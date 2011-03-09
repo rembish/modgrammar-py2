@@ -1,0 +1,40 @@
+Metadata-Version: 1.0
+Name: modgrammar
+Version: 0.6
+Summary: Modular grammar-parsing engine
+Home-page: http://code.google.com/modgrammar
+Author: Alex Stewart
+Author-email: alex@foogod.com
+License: BSD
+Download-URL: http://pypi.python.org/pypi/modgrammar
+Description: Modgrammar is a general-purpose library for constructing language parsers and
+        interpreters using context-free grammar definitions in Python.  Language
+        parsing rules (grammars) can be defined using standard Python syntax, and then
+        used to parse and validate input strings or files into meaningful data
+        structures.  Possible applications range from simple input validation, to
+        complex expression evaluation, to full-fledged programming language parsing for
+        compilers or interpreters. 
+        
+        Some features include:
+        
+        * Pure-Python cross-platform design.
+        * Grammar definitions are done using standard Python syntax.
+        * Supports arbitrarily complex grammars, including recursion.
+        * Defining a grammar automatically creates a working parser for that grammar in
+          the process.
+        * Parse results contain full parse-tree information, including heirarchical
+          tokenization of the input.
+        * Parse result objects can be given custom methods and behaviors as part of the
+          grammar definition.
+        * Modular grammar design supports distributing grammars as python library
+          modules, combining grammars from multiple sources into larger grammars, and
+          even parameterized grammar definitions.
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Text Processing
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

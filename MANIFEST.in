@@ -1,0 +1,7 @@
+include setup.py pkg_utils.py distribute_setup.py
+include README CHANGELOG
+recursive-include modgrammar *.py
+recursive-include tests *.py
+recursive-include doc *
+include doc/_static
+global-exclude [/\].*
