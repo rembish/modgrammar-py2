@@ -1,2 +1,5 @@
+Version 0.7: 2011-03-25 Alex Stewart <alex@foogod.com>
+  * Added support for pickling result objects
+
 Version 0.6: 2011-03-04 Alex Stewart <alex@foogod.com>
   * First packaged version

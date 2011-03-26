@@ -40,6 +40,13 @@ DEFAULT = _Singleton("DEFAULT") # singleton used for detecting default arguments
 
 PARSEERROR_FOUNDTXT_LEN = 16
 
+def _gclass_reconstructor(name, bases, cdict):
+  return GrammarClass(name, bases, cdict)
+
+def _ginstance_reconstructor(name, bases, cdict):
+  cls = GrammarClass(name, bases, cdict)
+  return cls.__new__(cls)
+
 ###############################################################################
 
 _trace_level = 0
@@ -173,6 +180,19 @@ class GrammarClass (type):
       cls.grammar_whitespace = whitespace
     cls.__class_init__(classdict)
 
+  def __reduce__(cls):
+    try:
+      lookup = sys.modules[cls.__module__].__dict__[cls.__name__]
+    except KeyError:
+      lookup = None
+    if lookup == cls:
+      return cls.__name__
+    cdict = dict(cls.__dict__)
+    for key in cls.__dict__.keys():
+      if key.startswith('__'):
+        del cdict[key]
+    return (_gclass_reconstructor, (cls.__name__, cls.__bases__, cdict))
+
   def __repr__(cls):
     return cls.__class_repr__()
 
@@ -198,7 +218,7 @@ class GrammarClass (type):
     return EXCEPT(other, cls)
 
 class Text:
-  """Text objects are used to hold the current working text being matched against the grammar.  They keep track of both the text contents and certain other useful state information such as whether we"re at the beginning of a line or the end of a file, etc.
+  """Text objects are used to hold the current working text being matched against the grammar.  They keep track of both the text contents and certain other useful state information such as whether we're at the beginning of a line or the end of a file, etc.
      Do not use this class directly.  This is only intended to be used internally by the modgrammar module.
   """
   def __init__(self, string, bol=False, eof=False):
@@ -721,7 +741,6 @@ class Grammar(metaclass=GrammarClass):
     self._str_info = (string, start, end)
     self.elements = parsed
     self.string = ""
-    self.postprocessed = False
 
   def grammar_collapsed_elems(self, sessiondata):
     """
@@ -742,7 +761,7 @@ class Grammar(metaclass=GrammarClass):
 
   def grammar_postprocess(self, parent, sessiondata):
     self.parent = parent
-    if not self.postprocessed:
+    if hasattr(self, '_str_info'):
       s, start, end = self._str_info
       self.string = s[start:end]
       #del self._str_info
@@ -761,7 +780,7 @@ class Grammar(metaclass=GrammarClass):
         for e in elems:
           pp_elems.extend(e.grammar_postprocess(self, sessiondata))
         self.elements = tuple(pp_elems)
-        self.postprocessed = True
+        del self._str_info
     self.elem_init(sessiondata)
     return (self,)
 
@@ -882,6 +901,26 @@ class Grammar(metaclass=GrammarClass):
     if not details:
       details = (repr(self.string),)
     return "{}<{}>".format(name, ", ".join(details))
+
+  def __reduce__(self):
+    # This allows pickling of result objects based on classes which were dynamically generated at runtime (such as the results of LITERAL and WORD).  Normally, these are not pickleable because any pickleable object must be an instance of a class which can be looked up (by name) in the module's dictionary.  We provide a special function to unpickle such objects which will recreate the dynamic class first, and then provide an instance for the unpickler to use.
+    # Note: This does not handle dynamic-subclasses of dynamic-subclasses, but we don't generally have those for Grammar class types anyway.
+    cls = self.__class__
+    try:
+      lookup = sys.modules[cls.__module__].__dict__[cls.__name__]
+    except KeyError:
+      lookup = None
+    if lookup == cls:
+      return object.__reduce__(cls, self)
+    cdict = dict(cls.__dict__)
+    for key in cls.__dict__.keys():
+      if key.startswith('__'):
+        del cdict[key]
+    if hasattr(self, '__getstate__'):
+      state = self.__getstate__()
+    else:
+      state = self.__dict__
+    return (_ginstance_reconstructor, (cls.__name__, cls.__bases__, cdict), state)
 
 class AnonGrammar (Grammar):
   @classmethod

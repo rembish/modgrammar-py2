@@ -12,32 +12,10 @@ from distutils import log
 
 from pkg_utils import *
 
-class BuildSphinxCommand (Command):
-    description = "build Sphinx-based documentation"
-    user_options = [
-        ('sphinx-cmd=', None, "command to build sphinx docs [default: sphinx-build]"),
-        ('sphinx-dir=', None, "source directory for sphinx docs [default: sphinx]"),
-    ]
-
-    def initialize_options(self):
-        self.sphinx_cmd = 'sphinx-build'
-        self.sphinx_dir = 'sphinx'
-        self.build_base = None
-
-    def finalize_options(self):
-        if self.build_base is None:
-            build = self.get_finalized_command('build')
-            self.build_base = build.build_base
-
-    def run(self):
-        html_cmd = '{sphinx_cmd} -b html -d {build_base}/doctrees {sphinx_dir} {build_base}/html'
-        os.system(html_cmd.format(self.__dict__))
-
-
 setup(
     name='modgrammar',
     version=pkg_version,
-    url='http://code.google.com/modgrammar',
+    url='http://code.google.com/p/modgrammar',
     download_url='http://pypi.python.org/pypi/modgrammar',
     license='BSD',
     author='Alex Stewart',
