@@ -1,5 +1,7 @@
-Version 0.7: 2011-03-25 Alex Stewart <alex@foogod.com>
+Version 0.7: 2011-03-28 Alex Stewart <alex@foogod.com>
   * Added support for pickling result objects
+  * Fixed some issues where grammar_whitespace was not being set correctly on
+    some constructs.
 
 Version 0.6: 2011-03-04 Alex Stewart <alex@foogod.com>
   * First packaged version

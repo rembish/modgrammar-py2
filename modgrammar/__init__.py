@@ -164,6 +164,11 @@ class GrammarClass (type):
   "The metaclass for all Grammar classes"
 
   def __init__(cls, name, bases, classdict):
+    if "grammar_name" not in classdict:
+      cls.grammar_name = cls.__name__
+    if "grammar_desc" not in classdict:
+      cls.grammar_desc = cls.grammar_name
+    classdict["abstract"] = False
     cls.grammar = util.regularize(cls.grammar)
     tags = getattr(cls, "grammar_tags", ())
     if isinstance(tags, str):
@@ -171,16 +176,14 @@ class GrammarClass (type):
       # gracefully...
       tags = (tags,)
     cls.grammar_tags = tags
-    if "grammar_name" not in classdict:
-      cls.grammar_name = cls.__name__
-    if "grammar_desc" not in classdict:
-      cls.grammar_desc = cls.grammar_name
-    if "grammar_whitespace" not in classdict:
+    if "grammar_whitespace" not in classdict and cls.grammar_whitespace is None:
       whitespace = sys.modules[cls.__module__].__dict__.get("grammar_whitespace", grammar_whitespace)
       cls.grammar_whitespace = whitespace
     cls.__class_init__(classdict)
 
   def __reduce__(cls):
+    # Note: __reduce__ on metaclasses does not currently work, so this is
+    # currently unused.  The hope is that someday it will actually work.
     try:
       lookup = sys.modules[cls.__module__].__dict__[cls.__name__]
     except KeyError:
@@ -497,6 +500,7 @@ class Grammar(metaclass=GrammarClass):
   grammar_collapse = False
   grammar_greedy = True
   grammar_null_subtoken_ok = True
+  grammar_whitespace = None
 
   @classmethod
   def __class_init__(cls, attrs):
@@ -515,7 +519,7 @@ class Grammar(metaclass=GrammarClass):
     return GrammarParser(cls, sessiondata, tabs)
 
   @classmethod
-  def grammar_skipspace(cls, text, index):
+  def grammar_skipspace(cls, text, index, sessiondata):
     if cls.grammar_whitespace:
       return util._optspace_re.match(text.string, index).end()
     else:
@@ -557,7 +561,7 @@ class Grammar(metaclass=GrammarClass):
           objs = list(objs)
         if len(objs) >= grammar_max:
           break
-        pos = cls.grammar_skipspace(text, pos)
+        pos = cls.grammar_skipspace(text, pos, sessiondata)
         s = grammar[len(objs)].grammar_parse(text, pos, sessiondata)
         offset, obj = next(s)
         while offset is None:
@@ -923,6 +927,8 @@ class Grammar(metaclass=GrammarClass):
     return (_ginstance_reconstructor, (cls.__name__, cls.__bases__, cdict), state)
 
 class AnonGrammar (Grammar):
+  grammar_whitespace = None
+
   @classmethod
   def grammar_details(cls, depth=-1, visited=None):
     if len(cls.grammar) == 1:
@@ -1002,14 +1008,14 @@ def GRAMMAR(*subgrammars, **kwargs):
   if len(grammar) == 1 and not kwargs:
     return grammar[0]
   else:
-    cdict = util.make_classdict(grammar, kwargs)
+    cdict = util.make_classdict(AnonGrammar, grammar, kwargs)
     return GrammarClass("<GRAMMAR>", (AnonGrammar,), cdict)
 
 def LITERAL(string, **kwargs):
   """
   Create a simple grammar that only matches the specified literal string.  Literal matches are case-sensitive.
   """
-  cdict = util.make_classdict((), kwargs, string=string)
+  cdict = util.make_classdict(Literal, (), kwargs, string=string)
   return GrammarClass("<LITERAL>", (Literal,), cdict)
 
 class ANY (Terminal):
@@ -1022,7 +1028,6 @@ class ANY (Terminal):
     yield error_result(index, cls)
 
 class EMPTY (Terminal):
-  grammar_whitespace = False
   grammar_collapse = True
   grammar_collapse_skip = True
   grammar_desc = "(nothing)"
@@ -1053,10 +1058,12 @@ def OR(*grammars, **kwargs):
       collapsed.extend(g.grammar_OR_merge())
     else:
       collapsed.append(GRAMMAR(g))
-  cdict = util.make_classdict(collapsed, kwargs)
+  cdict = util.make_classdict(OR_Operator, collapsed, kwargs)
   return GrammarClass("<OR>", (OR_Operator,), cdict)
 
 class OR_Operator (Grammar):
+  grammar_whitespace = False
+
   @classmethod
   def grammar_parse(cls, text, index, sessiondata):
     best_error = None
@@ -1100,10 +1107,12 @@ def EXCEPT(grammar, exc_grammar, **kwargs):
 
   Note: In many cases there are more efficient ways to design a particular grammar than using this construct.  It is provided mostly for full EBNF compatibility.
   """
-  cdict = util.make_classdict((grammar, exc_grammar), kwargs)
+  cdict = util.make_classdict(ExceptionGrammar, (grammar, exc_grammar), kwargs)
   return GrammarClass("<EXCEPT>", (ExceptionGrammar,), cdict)
 
 class ExceptionGrammar (Grammar):
+  grammar_whitespace = False
+
   @classmethod
   def __class_init__(cls, attrs):
     if not "grammar_desc" in attrs and cls.grammar:
@@ -1169,7 +1178,7 @@ def REPEAT(*grammar, **kwargs):
   """
   Match (by default) one-or-more repetitions of *grammar*, one right after another.  If the *min* or *max* keyword parameters are provided, the number of matches can be restricted to a particular range.
   """
-  cdict = util.make_classdict(grammar, kwargs)
+  cdict = util.make_classdict(Repetition, grammar, kwargs)
   return GrammarClass("<REPEAT>", (Repetition,), cdict)
 
 class Repetition (Grammar):
@@ -1177,6 +1186,7 @@ class Repetition (Grammar):
   grammar_null_subtoken_ok = False
   grammar_min = 1
   grammar_max = None
+  grammar_whitespace = None
   
   @classmethod
   def __class_init__(cls, attrs):
@@ -1252,7 +1262,7 @@ def WORD(startchars, restchars=None, **kwargs):
 
   *startchars* and *restchars* are each strings containing a sequence of individual characters, or character ranges, in the same format used by python regular expressions for character-range (``[]``) operations (i.e. ``"0123456789"`` or ``"A-Za-z"``).  If the first character of *startchars* or *restchars* is ``^``, the meaning is also inverted, just as in regular expressions, so ``"^A-Z"`` would match anything *except* an upper-case ascii alphabet character.
   """
-  cdict = util.make_classdict((), kwargs, startchars=startchars, restchars=restchars)
+  cdict = util.make_classdict(Word, (), kwargs, startchars=startchars, restchars=restchars)
   return GrammarClass("<WORD>", (Word,), cdict)
 
 class Word (Terminal):
@@ -1362,6 +1372,7 @@ class Reference (Grammar):
   ref_name = None
   ref_base = None
   ref_default = None
+  grammar_whitespace = False
 
   @classmethod
   def __class_init__(cls, attrs):
@@ -1429,12 +1440,13 @@ def LIST_OF(*grammar, **kwargs):
 
   Note: Although this is most commonly used with a literal separator (such as the default ``","``), actually any (arbitrarily-complex) subgrammar can be specified for *sep* if desired.
   """
-  cdict = util.make_classdict(grammar, kwargs)
+  cdict = util.make_classdict(ListRepetition, grammar, kwargs)
   return GrammarClass("<LIST>", (ListRepetition,), cdict)
 
 class ListRepetition (Repetition):
   sep = LITERAL(",")
   grammar_min = 1
+  grammar_whitespace = None
 
   @classmethod
   def __class_init__(cls, attrs):
@@ -1532,11 +1544,16 @@ class EOF (Terminal):
 class EOL (Terminal):
   grammar_desc = "end of line"
   grammar_collapse_skip = True
-  grammar = (L("\n\r") | L("\r\n") | L("\r") | L("\n"))
+  #TODO: need a better way to inherit whitespace settings
+  grammar = (OR(L("\n\r", whitespace=False),
+                L("\r\n", whitespace=False),
+                L("\r", whitespace=False),
+                L("\n", whitespace=False),
+                whitespace=False))
 
-REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line")
+REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line", whitespace=False)
 
-SPACE = ANY_EXCEPT("\S\r\n", grammar_name="SPACE")
+SPACE = ANY_EXCEPT("\S\r\n", grammar_name="SPACE", whitespace=False)
 
 ###############################################################################
 

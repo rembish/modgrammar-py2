@@ -74,15 +74,15 @@ def add_grammar(one, two):
 
 classdict_map = dict(count='grammar_count', min='grammar_min', max='grammar_max', collapse='grammar_collapse', collapse_skip='grammar_collapse_skip', tags='grammar_tags', greedy='grammar_greedy', whitespace='grammar_whitespace')
 
-def make_classdict(grammar, kwargs, **defaults):
+def make_classdict(base, grammar, kwargs, **defaults):
   cdict = {}
   for d in defaults, kwargs:
     for key, value in d.items():
       key = classdict_map.get(key, key)
       cdict[key] = value
   cdict['grammar'] = grammar
-  if not "grammar_whitespace" in cdict:
-    mdict = get_calling_module(1).__dict__
+  if not "grammar_whitespace" in cdict and base.grammar_whitespace is None:
+    mdict = get_calling_module().__dict__
     whitespace = mdict.get("grammar_whitespace", modgrammar.grammar_whitespace)
     cdict["grammar_whitespace"] = whitespace
   return cdict
@@ -104,16 +104,19 @@ def calc_line_col(string, count, line=0, col=0, tabs=1):
     col += count - pos
   return (line, col)
 
-def get_calling_module(level=0, stack=None):
+def get_calling_module(stack=None):
   if stack is None:
-    stack = traceback.extract_stack(None, 3+level)
-  filename = stack[0][0]
-  if filename == "<stdin>":
-    return sys.modules["__main__"]
-  else:
-    for m in sys.modules.values():
-      if getattr(m, "__file__", None) == filename:
-        return m
+    stack = traceback.extract_stack(None)
+  for s in reversed(stack):
+    filename = s[0]
+    if filename == "<stdin>":
+      return sys.modules["__main__"]
+    elif filename == __file__ or filename == modgrammar.__file__:
+      continue
+    else:
+      for m in sys.modules.values():
+        if getattr(m, "__file__", None) == filename:
+          return m
   # For some reason, we weren't able to determine the module.  Not much we
   # can do here..
   return None

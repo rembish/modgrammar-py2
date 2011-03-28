@@ -1,7 +1,7 @@
 import unittest
 import sys
 
-all_testmodules = ["basic_grammar", "ref_tests"]
+all_testmodules = ["basic_grammar", "ref_tests", "whitespace"]
 
 def suite():
   this_module=sys.modules[__name__]
