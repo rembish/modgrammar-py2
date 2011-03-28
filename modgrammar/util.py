@@ -5,7 +5,7 @@ import sys
 import modgrammar
 
 # FIXME: localization
-_whitespace_re = re.compile('\s*')
+_whitespace_re = re.compile('\s+')
 
 functional_attrs = ('grammar', 'grammar_min', 'grammar_max', 'grammar_collapse', 'grammar_whitespace', 'grammar_greedy')
 

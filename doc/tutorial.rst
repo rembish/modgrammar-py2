@@ -331,6 +331,8 @@ Luckily, this behavior is configurable.  If you would prefer that your grammar *
 
 Tip: Even if you do want your grammars to skip whitespace, it's a good idea to set *grammar_whitespace* explicitly at the beginning of your module just to be sure.  This way, if somehow the global ``modgrammar.grammar_whitespace`` gets set to something different than you expect, it won't affect any of your defined grammar classes.
 
+It is also possible to configure your grammars to consume whitespace, but specify a different criteria for what constitutes "whitespace".  For example, you may want to automatically skip over spaces and tabs, but not line-end characters.  To do this, instead of setting *grammar_whitespace* to :const:`True` or :const:`False`, you can set it to a regular expression object instead (see the :mod:`re` module for more info on regular expressions).  In this case, the provided regular expression will be used to determine how much (if any) of the string should be skipped over to get to the next token.
+
 Greed Is Good (But Not Always)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -506,15 +506,6 @@ class Grammar(metaclass=GrammarClass):
     """
     return GrammarParser(cls, sessiondata, tabs)
 
-  @classmethod
-  def grammar_skipspace(cls, text, index, sessiondata):
-    if cls.grammar_whitespace is True:
-      return util._whitespace_re.match(text.string, index).end()
-    elif cls.grammar_whitespace:
-      return cls.grammar_whitespace.match(text.string, index).end()
-    else:
-      return index
-
   # Yields:
   #   Success:     (count, obj)
   #   Incomplete:  (None, None)
@@ -531,6 +522,10 @@ class Grammar(metaclass=GrammarClass):
     grammar_min = cls.grammar_min
     grammar_max = cls.grammar_max
     greedy = cls.grammar_greedy
+    if cls.grammar_whitespace is True:
+      whitespace_re = util._whitespace_re
+    else:
+      whitespace_re = cls.grammar_whitespace
     objs = []
     states = []
     positions = []
@@ -552,7 +547,10 @@ class Grammar(metaclass=GrammarClass):
         if len(objs) >= grammar_max:
           break
         prews_pos = pos
-        pos = cls.grammar_skipspace(text, pos, sessiondata)
+        if whitespace_re:
+          m = whitespace_re.match(text.string, pos)
+          if m:
+            pos = m.end()
         s = grammar[len(objs)].grammar_parse(text, pos, sessiondata)
         offset, obj = next(s)
         while offset is None:

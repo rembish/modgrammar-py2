@@ -36,6 +36,8 @@ Class Attributes
 
       If set to :const:`True` (the default), this grammar will automatically skip over any whitespace found between its sub-grammars (it will be "whitespace consuming").  If set to :const:`False`, whitespace between elements will not be treated specially.
 
+      In the case where you want a grammar to be "whitespace consuming" but want something other than the normal definition of "whitespace", you can also set :attr:`~Grammar.grammar_whitespace` to a custom regular expression object to be used instead.  This regular expression should attempt to match as much whitespace as possible, starting at the specified position in the string (the actual match result is not used, except that its length is used to determine how far to skip ahead in the string).
+
       Note: In general, you will want to set this universally for your whole grammar.  The best way to do this is to define a ``grammar_whitespace`` module-level variable in the same module as your grammar classes are defined.  If this is present, it will be used as the default for all grammar classes in that module.
 
    There are also a few less-commonly-used class attributes which may be useful when inspecting grammars, or may be overridden in special cases:
