@@ -73,6 +73,7 @@ class BasicGrammarTestCase (TestCase):
     self.subgrammar_types = ()
     self.expected_match_types = None
     self.terminal = True
+    self.check_min_max = True
     self.matches = ()
     self.matches_with_remainder = ()
     self.matches_as_false = ()
@@ -94,9 +95,10 @@ class BasicGrammarTestCase (TestCase):
       if istrue is not None:
         self.assertEqual(bool(o), istrue, msg)
       self.assertEqual(o.grammar_terminal, self.terminal, msg)
-      mintok, maxtok = self.num_tokens_for(teststr)
-      self.assertGreaterEqual(len(o.tokens()), mintok, msg)
-      self.assertLessEqual(len(o.tokens()), maxtok, msg)
+      if self.check_min_max:
+        mintok, maxtok = self.num_tokens_for(teststr)
+        self.assertGreaterEqual(len(o.tokens()), mintok, msg)
+        self.assertLessEqual(len(o.tokens()), maxtok, msg)
 
   def num_tokens_for(self, teststr):
     if self.grammar.grammar_terminal:

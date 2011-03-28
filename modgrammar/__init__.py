@@ -508,8 +508,10 @@ class Grammar(metaclass=GrammarClass):
 
   @classmethod
   def grammar_skipspace(cls, text, index, sessiondata):
-    if cls.grammar_whitespace:
+    if cls.grammar_whitespace is True:
       return util._whitespace_re.match(text.string, index).end()
+    elif cls.grammar_whitespace:
+      return cls.grammar_whitespace.match(text.string, index).end()
     else:
       return index
 
@@ -549,6 +551,7 @@ class Grammar(metaclass=GrammarClass):
           objs = list(objs)
         if len(objs) >= grammar_max:
           break
+        prews_pos = pos
         pos = cls.grammar_skipspace(text, pos, sessiondata)
         s = grammar[len(objs)].grammar_parse(text, pos, sessiondata)
         offset, obj = next(s)
@@ -560,6 +563,7 @@ class Grammar(metaclass=GrammarClass):
           offset, obj = s.send(text)
         if offset is False:
           best_error = util.update_best_error(best_error, obj)
+          pos = prews_pos
           break
         objs.append(obj)
         states.append((pos, s))
@@ -1534,9 +1538,9 @@ class EOL (Terminal):
   grammar_collapse_skip = True
   grammar = (L("\n\r") | L("\r\n") | L("\r") | L("\n"))
 
-REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line", whitespace=False)
+REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line")
 
-SPACE = ANY_EXCEPT("\S\r\n", grammar_name="SPACE", whitespace=False)
+SPACE = ANY_EXCEPT("\S\r\n", grammar_name="SPACE")
 
 ###############################################################################
 
