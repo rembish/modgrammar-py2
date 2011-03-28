@@ -390,7 +390,7 @@ class TestBOL (util.BasicGrammarTestCase):
       self.grammar.parser().parse_string('a', bol=False)
 
   def test_mid_string(self):
-    grammar = GRAMMAR(ANY, ANY, BOL)
+    grammar = GRAMMAR(ANY, BOL)
     p = grammar.parser()
     o = p.parse_string('a\na')
     self.assertIsNotNone(o)

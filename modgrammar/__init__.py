@@ -120,9 +120,11 @@ class ParseError (Exception):
         expected_txt = " or ".join(sorted(e.grammar_desc for e in expected))
         end = min(len(buf), pos + PARSEERROR_FOUNDTXT_LEN)
         found_txt = buf[pos:end]
-        if not found_txt:
+        if found_txt:
+          found_txt = repr(found_txt)
+        else:
           found_txt = "(end of input)"
-        message = "Expected {}: Found {!r}".format(expected_txt, found_txt)
+        message = "Expected {}: Found {}".format(expected_txt, found_txt)
     self.buffer = buf
     self.buffer_pos = pos
     self.char = char
