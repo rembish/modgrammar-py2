@@ -48,20 +48,6 @@ def _ginstance_reconstructor(name, bases, cdict):
   return cls.__new__(cls)
 
 ###############################################################################
-
-_trace_level = 0
-
-def _trace_descend(cls, msg):
-  global _trace_level
-  print("%s%s: %s" % ("  "*_trace_level, cls.grammar_name, msg))
-  _trace_level += 1
-
-def _trace_ascend(cls, msg):
-  global _trace_level
-  _trace_level -= 1
-  print("%s%s: %s" % ("  "*_trace_level, cls.grammar_name, msg))
-
-###############################################################################
 #                                 Exceptions                                  #
 ###############################################################################
 
@@ -521,7 +507,7 @@ class Grammar(metaclass=GrammarClass):
   @classmethod
   def grammar_skipspace(cls, text, index, sessiondata):
     if cls.grammar_whitespace:
-      return util._optspace_re.match(text.string, index).end()
+      return util._whitespace_re.match(text.string, index).end()
     else:
       return index
 
@@ -1544,12 +1530,7 @@ class EOF (Terminal):
 class EOL (Terminal):
   grammar_desc = "end of line"
   grammar_collapse_skip = True
-  #TODO: need a better way to inherit whitespace settings
-  grammar = (OR(L("\n\r", whitespace=False),
-                L("\r\n", whitespace=False),
-                L("\r", whitespace=False),
-                L("\n", whitespace=False),
-                whitespace=False))
+  grammar = (L("\n\r") | L("\r\n") | L("\r") | L("\n"))
 
 REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line", whitespace=False)
 

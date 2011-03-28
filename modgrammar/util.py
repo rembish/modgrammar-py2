@@ -5,8 +5,7 @@ import sys
 import modgrammar
 
 # FIXME: localization
-_optspace_re = re.compile('[^\S\n]*')
-_whitespace_re = re.compile('[^\S\n]+')
+_whitespace_re = re.compile('\s*')
 
 functional_attrs = ('grammar', 'grammar_min', 'grammar_max', 'grammar_collapse', 'grammar_whitespace', 'grammar_greedy')
 
@@ -134,13 +133,6 @@ class RepeatingTuple (tuple):
       return tuple.__getitem__(self, 0)
     else:
       return tuple.__getitem__(self, 1)
-
-  #FIXME: try to figure out how to subclass tuple instead
-  def __setitem__(self, index, value):
-    return NotImplemented
-
-  def __delitem__(self, index):
-    return NotImplemented
 
   def __len__(self):
     return self.len
