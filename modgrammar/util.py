@@ -4,12 +4,7 @@ import sys
 
 import modgrammar
 
-# FIXME: localization
 _whitespace_re = re.compile('\s+')
-
-functional_attrs = ('grammar', 'grammar_min', 'grammar_max', 'grammar_collapse', 'grammar_whitespace', 'grammar_greedy')
-
-STATE_END = "STATE_END"
 
 def update_best_error(current_best, err):
   if not current_best:

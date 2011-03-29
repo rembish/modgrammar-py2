@@ -729,11 +729,14 @@ class Grammar(metaclass=GrammarClass):
 
     if not skip:
       skip = set()
-    elif cls in skip:
-      return
     else:
-      skip = set(skip)
-    skip.add(cls)
+      # We maintain 'skip' as a set of ids, because keeping the objects
+      # themselves will call __hash__ on them, which makes the 'grammar'
+      # attribute immutable, which means we can't do what we need to do.
+      skip = set(x if isinstance(x, int) else id(x) for x in skip)
+    if id(cls) in skip:
+      return
+    skip.add(id(cls))
     grammar = []
     for g in cls.grammar:
       rec = recurse
