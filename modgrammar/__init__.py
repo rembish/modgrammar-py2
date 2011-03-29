@@ -152,6 +152,7 @@ class GrammarClass (type):
   "The metaclass for all Grammar classes"
 
   def __init__(cls, name, bases, classdict):
+    cls._hash_id = None
     if "grammar_name" not in classdict:
       cls.grammar_name = cls.__name__
     if "grammar_desc" not in classdict:
@@ -207,6 +208,31 @@ class GrammarClass (type):
 
   def __rsub__(cls, other):
     return EXCEPT(other, cls)
+
+  def __setattr__(cls, attr, value):
+    if attr in cls.grammar_hashattrs and cls._hash_id is not None:
+      # Python hashability requires that once something obtains our hash, it
+      # should never change, so we just consider these attributes read-only if
+      # our hash value has ever been calculated before.
+      raise AttributeError("Changing the value of the {!r} attribute would change the hash value of the object.".format(attr))
+    return type.__setattr__(cls, attr, value)
+
+  def __hash__(cls):
+    hash_id = cls._hash_id
+    if hash_id is None:
+      hash_id = hash(cls.grammar_hashdata())
+      cls._hash_id = hash_id
+    return hash_id
+
+  def __eq__(cls, other):
+    if not isinstance(other, GrammarClass):
+      return NotImplemented
+    return cls.grammar_hashdata() == other.grammar_hashdata()
+
+  def __ne__(cls, other):
+    if not isinstance(other, GrammarClass):
+      return NotImplemented
+    return cls.grammar_hashdata() != other.grammar_hashdata()
 
 class Text:
   """Text objects are used to hold the current working text being matched against the grammar.  They keep track of both the text contents and certain other useful state information such as whether we're at the beginning of a line or the end of a file, etc.
@@ -489,6 +515,7 @@ class Grammar(metaclass=GrammarClass):
   grammar_greedy = True
   grammar_null_subtoken_ok = True
   grammar_whitespace = None
+  grammar_hashattrs = ('grammar_name', 'grammar', 'grammar_min', 'grammar_max', 'grammar_collapse', 'grammar_greedy', 'grammar_whitespace')
 
   @classmethod
   def __class_init__(cls, attrs):
@@ -680,19 +707,8 @@ class Grammar(metaclass=GrammarClass):
       return "<Grammar[{}]: {}>".format(name, details)
 
   @classmethod
-  def grammar_equal(cls, other):
-    """
-    Determine whether this grammar is equal (will always match the same text in the same way) as another grammar.
-
-    (It may be necessary to override this method if you are creating a grammar class with a custom :meth:`grammar_parse` definition.)
-    """
-
-    if cls.grammar_parse.__func__ is not other.grammar_parse.__func__:
-      return False
-    for attr in util.functional_attrs:
-      if getattr(cls, attr) != getattr(other, attr):
-        return False
-    return True
+  def grammar_hashdata(cls):
+    return (cls.grammar_parse.__func__, tuple(getattr(cls, x) for x in cls.grammar_hashattrs))
 
   @classmethod
   def grammar_resolve_refs(cls, refmap={}, recurse=True, follow=False, missing_ok=False, skip=None):
@@ -958,6 +974,7 @@ class Terminal (Grammar):
 class Literal (Terminal):
   string = ""
   grammar_collapse_skip = True
+  grammar_hashattrs = ('string',)
 
   @classmethod
   def __class_init__(cls, attrs):
@@ -984,10 +1001,6 @@ class Literal (Terminal):
   @classmethod
   def grammar_ebnf_lhs(cls, opts):
     return (repr(cls.string), ())
-
-  @classmethod
-  def grammar_equal(cls, other):
-    return issubclass(other, Literal) and other.string == cls.string
 
 # NOTE: GRAMMAR and LITERAL must occur before Repetition/ListRepetition because
 # they use them in their __class_init__ constructors.

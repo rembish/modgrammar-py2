@@ -6,9 +6,12 @@ from modgrammar import AnonGrammar
 from . import util
 
 #TODO:
+# * EOL
+# * SPACE
+# * REST_OF_LINE
 # * ANY
 # * EOF
-# * except grammars
+# * EXCEPT
 # * standard arg handling for all grammars that use them (count, min, max, collapse, name, desc)
 # * collapsing
 #
@@ -495,23 +498,6 @@ class TestBOL (util.BasicGrammarTestCase):
     self.assertIsNotNone(o)
     self.assertEqual(p.remainder(), '')
 
-
-class TestEOL (unittest.TestCase):
-  pass
-
-class TestSpace (unittest.TestCase):
-  pass
-
-#####
-
-class TestRE (unittest.TestCase):
-  pass
-
-class TestRestOfLine (unittest.TestCase):
-  pass
-
-class TestQuotedString (unittest.TestCase):
-  pass
 
 #####
 
