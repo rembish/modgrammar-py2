@@ -1,3 +1,4 @@
+import sys
 import unittest
 from modgrammar import ParseError
 from modgrammar.util import RepeatingTuple
@@ -220,4 +221,31 @@ class BasicGrammarTestCase (TestCase):
         self.assertIsNone(o, "[%s of %s]" % (repr(pstr), case))
       with self.assertRaises(ParseError, msg=msg):
         p.parse_string(final)
+
+  def test_pre_post_space(self):
+    try:
+      p = self.grammar.parser()
+      if self.grammar.grammar_whitespace is True:
+        for teststr in self.matches + self.matches_with_remainder:
+          msg = '[testcase=%s]' % (teststr,)
+          p.reset()
+          teststr = ' ' + teststr + ' '
+          o = p.parse_string(teststr)
+          remainder = p.remainder()
+          self.assertNotEqual(remainder, '', msg)
+          self.check_result(teststr[:-len(remainder)], o, None, msg)
+      elif self.grammar.grammar_whitespace is False:
+        for teststr in self.matches + self.matches_with_remainder:
+          p.reset()
+          msg = '[testcase=%s]' % (teststr,)
+          teststr = ' ' + teststr
+          try:
+            o = p.parse_string(teststr)
+          except ParseError:
+            pass
+          else:
+            remainder = p.remainder()
+            self.assertEqual(remainder, teststr, msg)
+    except ParseError:
+      self.fail("Got unexpected ParseError %s" % (msg,))
 

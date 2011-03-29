@@ -33,7 +33,6 @@ default_grammars = (
   ("GRAMMAR('A', 'B')", GRAMMAR('A', 'B'), True),
   ("G('A', 'B')", G('A', 'B'), True),
   ("REPEAT(L('A'))", REPEAT(L('A')), True),
-  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), True),
   ("ZERO_OR_MORE(L('A'))", ZERO_OR_MORE(L('A')), True),
   ("ONE_OR_MORE(L('A'))", ONE_OR_MORE(L('A')), True),
   ("LIST_OF(L('A'), sep=L('A'))", LIST_OF(L('A'), sep=L('A')), True),
@@ -75,6 +74,7 @@ default_grammars = (
   ("ANY_EXCEPT('A')", ANY_EXCEPT('A'), False),
   ("OR(L('A'), L('B'))", OR(L('A'), L('B')), False),
   ("L('A') | L('B')", L('A') | L('B'), False),
+  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), False),
   ("EXCEPT(L('A'), L('B'))", EXCEPT(L('A'), L('B')), False),
   ("ANY", ANY, False),
   ("EOL", EOL, False),
@@ -109,7 +109,6 @@ modfalse_grammars = (
   ("GRAMMAR('A', 'B')", GRAMMAR('A', 'B'), False),
   ("G('A', 'B')", G('A', 'B'), False),
   ("REPEAT(L('A'))", REPEAT(L('A')), False),
-  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), False),
   ("ZERO_OR_MORE(L('A'))", ZERO_OR_MORE(L('A')), False),
   ("ONE_OR_MORE(L('A'))", ONE_OR_MORE(L('A')), False),
   ("LIST_OF(L('A'), sep=L('A'))", LIST_OF(L('A'), sep=L('A')), False),
@@ -151,6 +150,7 @@ modfalse_grammars = (
   ("ANY_EXCEPT('A')", ANY_EXCEPT('A'), False),
   ("OR(L('A'), L('B'))", OR(L('A'), L('B')), False),
   ("L('A') | L('B')", L('A') | L('B'), False),
+  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), False),
   ("EXCEPT(L('A'), L('B'))", EXCEPT(L('A'), L('B')), False),
   ("ANY", ANY, False),
   ("EOL", EOL, False),
@@ -185,7 +185,6 @@ modtrue_grammars = (
   ("GRAMMAR('A', 'B')", GRAMMAR('A', 'B'), True),
   ("G('A', 'B')", G('A', 'B'), True),
   ("REPEAT(L('A'))", REPEAT(L('A')), True),
-  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), True),
   ("ZERO_OR_MORE(L('A'))", ZERO_OR_MORE(L('A')), True),
   ("ONE_OR_MORE(L('A'))", ONE_OR_MORE(L('A')), True),
   ("LIST_OF(L('A'), sep=L('A'))", LIST_OF(L('A'), sep=L('A')), True),
@@ -227,6 +226,7 @@ modtrue_grammars = (
   ("ANY_EXCEPT('A')", ANY_EXCEPT('A'), False),
   ("OR(L('A'), L('B'))", OR(L('A'), L('B')), False),
   ("L('A') | L('B')", L('A') | L('B'), False),
+  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), False),
   ("EXCEPT(L('A'), L('B'))", EXCEPT(L('A'), L('B')), False),
   ("ANY", ANY, False),
   ("EOL", EOL, False),
@@ -261,7 +261,6 @@ modwsre_grammars = (
   ("GRAMMAR('A', 'B')", GRAMMAR('A', 'B'), WSRE),
   ("G('A', 'B')", G('A', 'B'), WSRE),
   ("REPEAT(L('A'))", REPEAT(L('A')), WSRE),
-  ("OPTIONAL(L('A'))", OPTIONAL(L('A')), WSRE),
   ("ZERO_OR_MORE(L('A'))", ZERO_OR_MORE(L('A')), WSRE),
   ("ONE_OR_MORE(L('A'))", ONE_OR_MORE(L('A')), WSRE),
   ("LIST_OF(L('A'), sep=L('A'))", LIST_OF(L('A'), sep=L('A')), WSRE),
@@ -322,18 +321,20 @@ class WhitespaceSettingTests (util.TestCase):
   def check_recursive(self, name, g, expected, expected_sub):
     if g.grammar_whitespace != expected:
       raise self.failureException("When testing {}: grammar_whitespace for {!r} is {!r}".format(name, g, g.grammar_whitespace))
-    sub_list = g.grammar
-    if isinstance(sub_list, RepeatingTuple):
-      sub_list = [g.grammar[0]]
-      if len(g.grammar) > 1:
-        sub_list.append(g.grammar[1])
-    if isinstance(g, ListRepetition):
-      sub_list = list(sub_list)
-      sub_list.append(g.sep)
+    if issubclass(g, ListRepetition):
+      if g.grammar[1].grammar_whitespace != expected:
+        raise self.failureException("When testing {}: grammar_whitespace for {!r} is {!r}".format(name, g.grammar[1], g.grammar[1].grammar_whitespace))
+      sub_list = [g.grammar[0], g.sep]
+    else:
+      sub_list = g.grammar
+      if isinstance(sub_list, RepeatingTuple):
+        sub_list = [g.grammar[0]]
+        if len(g.grammar) > 1:
+          sub_list.append(g.grammar[1])
     for sub_g in sub_list:
       if issubclass(sub_g, (Terminal, OR_Operator)):
-	# Terminals (and OR constructs) always normally have grammar_whitespace
-	# set to False
+        # Terminals (and OR constructs) always normally have grammar_whitespace
+        # set to False
         self.check_recursive(name, sub_g, False, expected_sub)
       else:
         self.check_recursive(name, sub_g, expected_sub, expected_sub)

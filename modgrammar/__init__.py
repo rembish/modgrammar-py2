@@ -548,9 +548,13 @@ class Grammar(metaclass=GrammarClass):
           break
         prews_pos = pos
         if whitespace_re:
-          m = whitespace_re.match(text.string, pos)
-          if m:
-            pos = m.end()
+          while True:
+            m = whitespace_re.match(text.string, pos)
+            if m:
+              pos = m.end()
+            if pos < len(text.string):
+              break
+            text = yield (None, None)
         s = grammar[len(objs)].grammar_parse(text, pos, sessiondata)
         offset, obj = next(s)
         while offset is None:
@@ -1443,7 +1447,7 @@ class ListRepetition (Repetition):
     grammar = GRAMMAR(cls.grammar)
     Repetition.__class_init__.__func__(cls, attrs)
     cls.sep = GRAMMAR(cls.sep)
-    succ_grammar = GRAMMAR(cls.sep, grammar)
+    succ_grammar = GRAMMAR(cls.sep, grammar, whitespace=cls.grammar_whitespace)
     cls.grammar = util.RepeatingTuple(grammar, succ_grammar, len=cls.grammar_max)
 
   @classmethod
@@ -1484,6 +1488,7 @@ def OPTIONAL(*grammar, **kwargs):
   kwargs.update(min=0, max=1)
   kwargs.setdefault("collapse", True)
   kwargs.setdefault("grammar_name", "<OPTIONAL>")
+  kwargs.setdefault("whitespace", False)
   return REPEAT(*grammar, **kwargs)
 
 def ZERO_OR_MORE(*grammar, **kwargs):

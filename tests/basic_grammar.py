@@ -15,35 +15,90 @@ from . import util
 # * corner cases for parse_string
 # * EOF-handling for non-EOF grammars
 # * collapse_skip
-# * whitespace handling
+
+grammar_whitespace = True
 
 NoneType = type(None)
 
-class TestGrammar (util.TestCase):
-  def test_classdef(self):
-    class G (Grammar):
-      grammar = 'ABC'
-    self.check_grammarclass(G, 1)
+class G1 (Grammar):
+  grammar = 'ABC'
+
+class G2 (Grammar):
+  grammar = ('ABC', 'DEF')
+
+class G3 (Grammar):
+  grammar = ('ABC', 'DEF')
+  grammar_whitespace = False
+
+class TestG1 (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = G1
+    self.grammar_name = "G1"
+    self.grammar_details = "L('ABC')"
+    self.terminal = False
+    self.subgrammar_types = (Literal,)
+    self.matches = ('ABC',)
+    self.matches_with_remainder = ('ABCD',)
+    self.fail_matches = ('ABX', 'BC', 'abc', 'AB C')
+    self.partials = (('A', 'B', 'C'), ('AB', 'C'), ('A', 'BC'), ('AB','CD'))
+    self.fail_partials = (('A', 'B', 'X'), ('A', 'BX'))
+
+class TestG2 (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = G2
+    self.grammar_name = "G2"
+    self.grammar_details = "(L('ABC'), L('DEF'))"
+    self.terminal = False
+    self.subgrammar_types = (Literal, Literal)
+    self.matches = ('ABCDEF', 'ABC DEF')
+    self.matches_with_remainder = ('ABCDEFG',)
+    self.fail_matches = ('ABCDEX', 'ABCEF', 'abcdef', 'A BCDEF', 'ABCDE F')
+    self.partials = (('A', 'B', 'C', 'DEF'), ('ABC', 'D', 'E', 'F'), ('AB', 'CD', 'EF'), ('ABC', ' ', 'DEF'))
+    self.fail_partials = (('A', 'B', 'C', 'D', 'E', 'X'), ('ABC', 'D', 'EX'), ('AB', 'XDEF'))
+
+class TestG3 (util.BasicGrammarTestCase):
+  # For this, we're just checking that if grammar_whitespace=False, it won't
+  # match if there's whitespace between tokens.
+  def setUp(self):
+    self.grammar = G3
+    self.grammar_name = "G3"
+    self.grammar_details = "(L('ABC'), L('DEF'))"
+    self.terminal = False
+    self.subgrammar_types = (Literal, Literal)
+    self.matches = ('ABCDEF',)
+    self.fail_matches = ('ABC DEF',)
+
+class TestGRAMMAR (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = GRAMMAR('ABC', 'DEF')
+    self.grammar_name = "<GRAMMAR>"
+    self.grammar_details = "(L('ABC'), L('DEF'))"
+    self.terminal = False
+    self.subgrammar_types = (Literal, Literal)
+    self.matches = ('ABCDEF', 'ABC DEF')
+    self.matches_with_remainder = ('ABCDEFG',)
+    self.fail_matches = ('ABCDEX', 'ABCEF', 'abcdef', 'A BCDEF', 'ABCDE F')
+    self.partials = (('A', 'B', 'C', 'DEF'), ('ABC', 'D', 'E', 'F'), ('AB', 'CD', 'EF'), ('ABC', ' ', 'DEF'))
+    self.fail_partials = (('A', 'B', 'C', 'D', 'E', 'X'), ('ABC', 'D', 'EX'), ('AB', 'XDEF'))
 
   def test_funcdef(self):
-    g = GRAMMAR('ABC', 'DEF')
-    self.assertTrue(issubclass(g, modgrammar.AnonGrammar))
-    self.check_grammarclass(g, 2)
+    self.assertTrue(issubclass(self.grammar, modgrammar.AnonGrammar))
     # using GRAMMAR() with a single element should just return the
     # (regularized) element.
     g = GRAMMAR('ABC')
     self.assertTrue(issubclass(g, Literal))
 
-  def check_grammarclass(self, cls, glen):
-    # Make sure regularize correctly converts to a tuple and turns strings into
-    # literals.
-    self.assertIsInstance(cls.grammar, tuple)
-    self.assertEqual(len(cls.grammar), glen)
-    self.assertTrue(issubclass(cls.grammar[0], Literal))
-    # Make sure other standard class variables get set up right automatically
-    self.assertEqual(cls.grammar_min, glen)
-    self.assertEqual(cls.grammar_max, glen)
-    self.assertEqual(cls.grammar_tags, ())
+class TestGRAMMAR_NoWS (util.BasicGrammarTestCase):
+  # For this, we're just checking that if grammar_whitespace=False, it won't
+  # match if there's whitespace between tokens.
+  def setUp(self):
+    self.grammar = GRAMMAR('ABC', 'DEF', whitespace=False)
+    self.grammar_name = "<GRAMMAR>"
+    self.grammar_details = "(L('ABC'), L('DEF'))"
+    self.terminal = False
+    self.subgrammar_types = (Literal, Literal)
+    self.matches = ('ABCDEF',)
+    self.fail_matches = ('ABC DEF',)
 
 class TestLiteral (util.BasicGrammarTestCase):
   def setUp(self):
@@ -123,10 +178,10 @@ class TestRepeat1 (util.BasicGrammarTestCase):
     self.grammar_details = "REPEAT(L('ABC'), min=2, max=5)"
     self.subgrammar_types = (Literal, Literal, Literal, Literal, Literal)
     self.terminal = False
-    self.matches = ('ABCABCABCABCABC',)
-    self.matches_with_remainder = ('ABCABCx', 'ABCABCABCABx')
+    self.matches = ('ABCABCABCABCABC', 'ABC ABC ABC ABC ABC')
+    self.matches_with_remainder = ('ABCABCx', 'ABCABCABCABx', 'ABC ABCx', 'ABC ABC x')
     self.fail_matches = ('ABCx',)
-    self.partials = (('ABC', 'ABC', 'x'), ('ABCABC', 'x'), ('AB', 'CA', 'BC', 'x'), ('ABCABC', 'ABCABC', 'ABC'))
+    self.partials = (('ABC', 'ABC', 'x'), ('ABCABC', 'x'), ('AB', 'CA', 'BC', 'x'), ('ABCABC', 'ABCABC', 'ABC'), ('ABC ', 'ABC', ' ABC', ' ', 'ABC ABC'))
     self.fail_partials = (('ABC', 'ABx'),)
 
   def test_defaults(self):
@@ -174,6 +229,19 @@ class TestRepeat2 (util.BasicGrammarTestCase):
     self.terminal = False
     self.matches_with_remainder = ('ABCx', 'ABCABCABCABCABCABCABCABCx')
     self.matches_as_false = ('x')
+
+class TestRepeat1_NoWS (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = REPEAT('ABC', min=2, max=5, whitespace=False)
+    self.grammar_name = "<REPEAT>"
+    self.grammar_details = "REPEAT(L('ABC'), min=2, max=5)"
+    self.subgrammar_types = (Literal, Literal, Literal, Literal, Literal)
+    self.terminal = False
+    self.matches = ('ABCABCABCABCABC',)
+    self.matches_with_remainder = ('ABCABCx', 'ABCABCABCABx')
+    self.fail_matches = ('ABC ABC ABC ABC ABC', 'ABC ABC', 'ABCx')
+    self.partials = (('ABC', 'ABC', 'x'), ('ABCABC', 'x'), ('AB', 'CA', 'BC', 'x'), ('ABCABC', 'ABCABC', 'ABC'))
+    self.fail_partials = (('ABC', 'ABx'), ('ABC ',), ('ABC', ' ABC'), ('ABC', ' '))
 
 class TestOptional (util.BasicGrammarTestCase):
   def setUp(self):
@@ -248,10 +316,10 @@ class TestList1 (util.BasicGrammarTestCase):
     self.grammar_details = "LIST_OF(L('ABC'), sep=L(','), max=3)"
     self.subgrammar_types = (Literal, AnonGrammar, AnonGrammar)
     self.terminal = False
-    self.matches = ('ABC,ABC,ABC',)
+    self.matches = ('ABC,ABC,ABC', 'ABC, ABC ,ABC')
     self.matches_with_remainder = ('ABCx', 'ABC,ABCx', 'ABC,ABC,x', 'ABC,ABC,ABC,ABC')
     self.fail_matches = ('x',)
-    self.partials = (('A', 'B', 'C', 'x'), ('ABC', ',A', 'BCx'), ('ABC', ',', 'ABC', 'x'))
+    self.partials = (('A', 'B', 'C', 'x'), ('ABC', ',A', 'BCx'), ('ABC', ',', 'ABC', 'x'), ('ABC ', ',', ' ABC', ' ,', 'ABC'), ('ABC, ', 'ABC', ' ', ',', ' ', 'ABC'))
 
   def num_tokens_for(self, teststr):
     numtok = len(teststr.split(','))*2 - 1
@@ -278,6 +346,21 @@ class TestList2 (util.BasicGrammarTestCase):
 
   def num_tokens_for(self, teststr):
     numtok = (len(teststr.split('::'))*2 - 1)*2
+    return (numtok, numtok)
+
+class TestList_NoWS (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = LIST_OF('ABC', count=3, whitespace=False)
+    self.grammar_name = "<LIST>"
+    self.grammar_details = "LIST_OF(L('ABC'), sep=L(','), count=3)"
+    self.subgrammar_types = (Literal, AnonGrammar, AnonGrammar)
+    self.terminal = False
+    self.matches = ('ABC,ABC,ABC',)
+    self.fail_matches = ('ABC ,ABC,ABC', 'ABC, ABC,ABC')
+    self.fail_partials = (('ABC ',), ('ABC', ' ,'), ('ABC', ', '), ('ABC', ',', ' ABC'))
+
+  def num_tokens_for(self, teststr):
+    numtok = len(teststr.split(','))*2 - 1
     return (numtok, numtok)
 
 class TestWord1 (util.BasicGrammarTestCase):
@@ -377,6 +460,13 @@ class TestAnyExcept (util.BasicGrammarTestCase):
     self.fail_matches = ('abcd', 'a')
     self.partials = (('A', 'B', 'c'),)
 
+  def test_pre_post_space(self):
+    # This would normally fail the default pre/post space tests, because it has
+    # grammar_whitespace=False, but still matches fine if there's whitespace at
+    # the beginning (because whitespace characters match the ANY_EXCEPT
+    # criteria), so we'll just skip that test in this case.
+    pass
+
 class TestBOL (util.BasicGrammarTestCase):
   def setUp(self):
     self.grammar = BOL
@@ -391,6 +481,11 @@ class TestBOL (util.BasicGrammarTestCase):
 
   def test_mid_string(self):
     grammar = GRAMMAR(ANY, BOL)
+    p = grammar.parser()
+    o = p.parse_string('a\na')
+    self.assertIsNotNone(o)
+    self.assertEqual(p.remainder(), 'a')
+    grammar = GRAMMAR(ANY, ANY, BOL, whitespace=False)
     p = grammar.parser()
     o = p.parse_string('a\na')
     self.assertIsNotNone(o)
