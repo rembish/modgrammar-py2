@@ -8,7 +8,7 @@ __all__ = [
 ]
 
 def RE(regexp, **kwargs):
-  cdict = util.make_classdict((), kwargs, regexp=regexp)
+  cdict = util.make_classdict(REGrammar, (), kwargs, regexp=regexp)
   return GrammarClass("<RE>", (REGrammar,), cdict)
 
 _recaret_re = re.compile(r"(^|[^[])\^")
