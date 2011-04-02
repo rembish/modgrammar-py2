@@ -109,7 +109,7 @@ class BasicGrammarTestCase (TestCase):
   def check_sanity(self, grammar, subgrammar_types=()):
     '''Basic sanity-checks that should always be true for all Grammar classes'''
     subgrammar = grammar.grammar
-    self.assertIsInstance(subgrammar, (tuple, RepeatingTuple)) #FIXME
+    self.assertIsInstance(subgrammar, tuple)
     glen = len(subgrammar)
     if subgrammar_types is not None:
       self.assertEqual(glen, len(subgrammar_types))

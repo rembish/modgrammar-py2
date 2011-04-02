@@ -3,6 +3,7 @@ from . import util
 
 #TODO:
 # * corner cases for parse_string
+# * parse_lines
 
 class TestParseOpts (util.TestCase):
   def test_matchtype_or(self):
