@@ -1,4 +1,3 @@
-import unittest
 import sys
 import modgrammar
 from modgrammar import *
@@ -6,17 +5,8 @@ from modgrammar import AnonGrammar
 from . import util
 
 #TODO:
-# * EOL
-# * SPACE
-# * REST_OF_LINE
-# * ANY
-# * EOF
-# * EXCEPT
 # * standard arg handling for all grammars that use them (count, min, max, collapse, name, desc)
 # * collapsing
-#
-# * corner cases for parse_string
-# * EOF-handling for non-EOF grammars
 # * collapse_skip
 
 grammar_whitespace = True
@@ -154,7 +144,12 @@ class TestOr (util.BasicGrammarTestCase):
     g = 'ABC' | L('ABD')
     self.assertTrue(issubclass(g, modgrammar.OR_Operator))
     self.check_sanity(g, (Literal, Literal))
-    #TODO: L('ABC') | (L('Foo'), L('Bar'))
+    g = L('ABC') | (L('ABD'), L('CDE'))
+    self.assertTrue(issubclass(g, modgrammar.OR_Operator))
+    self.check_sanity(g, (Literal, AnonGrammar))
+    g = (L('ABC'), L('ABD')) | L('CDE')
+    self.assertTrue(issubclass(g, modgrammar.OR_Operator))
+    self.check_sanity(g, (AnonGrammar, Literal))
 
   def test_ormerge(self):
     """Test multiple ORs in sequence
@@ -498,35 +493,141 @@ class TestBOL (util.BasicGrammarTestCase):
     self.assertIsNotNone(o)
     self.assertEqual(p.remainder(), '')
 
+class TestEOL (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = EOL
+    self.grammar_name = "EOL"
+    self.grammar_details = "EOL"
+    self.subgrammar_types = None
+    self.matches = ('\r\n', '\n\r')
+    self.matches_with_remainder = ('\r ', '\n ', '\r\r', '\n\n', '\r\n\r', '\n\r\n', '\r\n\r\n', '\n\r\n\r')
+    self.fail_matches = ('a\n', ' \r', ' \n')
+    self.partials = (('\r', '\n'), ('\n', '\r'), ('\r', ' '), ('\n', ' '))
 
-#####
+class TestRestOfLine (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = REST_OF_LINE
+    self.grammar_name = "REST_OF_LINE"
+    self.grammar_details = "WORD('^\\r\\n', min=0)"
+    self.matches_with_remainder = ('\r', '\n', ' \r', ' \n')
+    self.matches_as_false = ('\r', '\n')
+    self.partials = (('ab', '\n'), ('ab', '\r'), ('a', 'b\r'), ('a', 'b\n'))
 
-class TestParseOpts (util.TestCase):
-  def test_matchtype(self):
-    grammar = OR('aa', 'aaaa', 'a', 'aaa')
-    o = grammar.parser().parse_string('aaaa')
-    self.assertEqual(o.string, 'aa') # Default should be 'first'
-    o = grammar.parser().parse_string('aaaa', matchtype='first')
-    self.assertEqual(o.string, 'aa')
-    o = grammar.parser().parse_string('aaaa', matchtype='last')
-    self.assertEqual(o.string, 'aaa')
-    o = grammar.parser().parse_string('aaaa', matchtype='longest')
-    self.assertEqual(o.string, 'aaaa')
-    o = grammar.parser().parse_string('aaaa', matchtype='shortest')
-    self.assertEqual(o.string, 'a')
-    o = grammar.parser().parse_string('aaaa', matchtype='all')
-    self.assertEqual([x.string for x in o], ['aa', 'aaaa', 'a', 'aaa'])
+  def test_pre_post_space(self):
+    # This would normally fail the default pre/post space tests, because it has
+    # grammar_whitespace=False, but still matches fine if there's whitespace at
+    # the beginning (because whitespace characters match the REST_OF_LINE
+    # criteria), so we'll just skip that test in this case.
+    pass
 
-  def test_multi(self):
-    grammar = L('a')
-    p = grammar.parser()
-    o = p.parse_string('aa')
-    self.assertEqual(o.string, 'a')
-    self.assertEqual(p.remainder(), 'a')
-    p.reset()
-    o = p.parse_string('aaa', multi=True)
-    self.assertIsInstance(o, list)
-    self.assertEqual([x.string for x in o], ['a', 'a', 'a'])
-    p.reset()
-    with self.assertRaises(ParseError):
-      o = p.parse_string('aab', multi=True)
+class TestANY (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = ANY
+    self.grammar_name = "ANY"
+    self.grammar_details = "ANY"
+    self.matches = ('a', 'A', ' ', '\n', '\0')
+    self.matches_with_remainder = ('aa', ' a', 'a ')
+
+  def test_pre_post_space(self):
+    # This would normally fail the default pre/post space tests, because it has
+    # grammar_whitespace=False, but still matches if there's whitespace at
+    # the beginning (because whitespace characters match the ANY
+    # criteria), so we'll just skip that test in this case.
+    # Actual testing of whitespace before/after a string is already handled by
+    # the matches_with_remainder test cases.
+    pass
+
+class TestSpace (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = SPACE
+    self.grammar_name = "SPACE"
+    self.grammar_details = "SPACE"
+    self.matches_with_remainder = (' \t\r\na', '   a')
+    self.fail_matches = ('a', 'a ')
+    self.partials = ((' ', 'a'),)
+
+  def test_pre_post_space(self):
+    # This would normally fail the default pre/post space tests, because it has
+    # grammar_whitespace=False, but still matches fine if there's whitespace at
+    # the beginning (because whitespace characters match the SPACE
+    # criteria), so we'll just skip that test in this case.
+    pass
+
+class TestEOF (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = EOF
+    self.grammar_name = "EOF"
+    self.grammar_details = "EOF"
+
+  def test_matches(self):
+    # EOF is kinda a special case, so we need to test it differently than most
+    # grammars.
+    g = self.grammar
+    p = g.parser()
+    try:
+      o = p.parse_string('', eof=True)
+      self.check_result('', o, True, '')
+    except ParseError:
+      self.fail("Got unexpected ParseError")
+
+  def test_match_fail(self):
+    p = self.grammar.parser()
+    for teststr in ('a', ' '):
+      p.reset()
+      msg = '[testcase={!r}]'.format(teststr)
+      with self.assertRaises(ParseError, msg=msg):
+        p.parse_string(teststr, eof=True)
+
+  def test_partial(self):
+    g = self.grammar
+    p = g.parser()
+    try:
+      o = p.parse_string('')
+      self.assertIsNone(o)
+      o = p.parse_string('', eof=True)
+      self.check_result('', o, True, '')
+    except ParseError:
+      self.fail("Got unexpected ParseError")
+
+  def test_inside_grammar(self):
+    g = GRAMMAR(EMPTY, EOF)
+    p = g.parser()
+    try:
+      for teststr in ('', ' '):
+        msg = '[testcase={!r}]'.format(teststr)
+        o = p.parse_string(teststr, eof=True)
+        self.assertIsNotNone(o)
+        self.assertEqual(len(p.remainder()), 0)
+    except ParseError:
+      self.fail("Got unexpected ParseError")
+
+class TestExcept (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = EXCEPT(WORD('A-Z', count=3), L('ABC'))
+    self.grammar_name = "<EXCEPT>"
+    self.grammar_details = "(WORD('A-Z', min=3, max=3) - L('ABC'))"
+    self.subgrammar_types = (Word, Literal)
+    self.expected_match_types = (Word, Literal)
+    self.matches = ('AAA', 'ABD')
+    self.fail_matches = ('ABC',)
+    self.partials = (('A', 'B', 'D'),)
+    self.fail_partials = (('A', 'B', 'C'),)
+
+  def num_tokens_for(self, teststr):
+    return (1, 1)
+
+  def test_operator(self):
+    g = L('ABC') - L('DEF')
+    self.assertTrue(issubclass(g, modgrammar.ExceptionGrammar))
+    self.check_sanity(g, (Literal, Literal))
+    g = L('ABC') - 'DEF'
+    self.assertTrue(issubclass(g, modgrammar.ExceptionGrammar))
+    self.check_sanity(g, (Literal, Literal))
+    g = 'ABC' - L('DEF')
+    self.assertTrue(issubclass(g, modgrammar.ExceptionGrammar))
+    self.check_sanity(g, (Literal, Literal))
+    g = L('ABC') - L('DEF') - L('GHI')
+    self.assertTrue(issubclass(g, modgrammar.ExceptionGrammar))
+    self.check_sanity(g, (modgrammar.ExceptionGrammar, Literal))
+    self.assertEqual(g.grammar[0].grammar[1].string, 'DEF')
+

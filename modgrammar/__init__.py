@@ -579,7 +579,7 @@ class Grammar(metaclass=GrammarClass):
             m = whitespace_re.match(text.string, pos)
             if m:
               pos = m.end()
-            if pos < len(text.string):
+            if pos < len(text.string) or text.eof:
               break
             text = yield (None, None)
         s = grammar[len(objs)].grammar_parse(text, pos, sessiondata)
@@ -1034,6 +1034,11 @@ class ANY (Terminal):
 
   @classmethod
   def grammar_parse(cls, text, index, sessiondata):
+    while index == len(text.string):
+      # The only case we can't match is if there's no input
+      if text.eof:
+        yield error_result(index, cls)
+      text = yield (None, None)
     yield (1, cls(text.string, index, index+1))
     yield error_result(index, cls)
 
@@ -1557,9 +1562,20 @@ class EOL (Terminal):
   grammar_collapse_skip = True
   grammar = (L("\n\r") | L("\r\n") | L("\r") | L("\n"))
 
-REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line")
+class SPACE (Word):
+  grammar_desc = "whitespace"
+  regexp = re.compile("[\s]+")
 
-SPACE = ANY_EXCEPT("\S\r\n", grammar_name="SPACE")
+  @classmethod
+  def __class_init__(cls, attrs):
+    # Don't do the normal Word __class_init__ stuff.
+    pass
+
+  @classmethod
+  def grammar_details(cls, depth=-1, visited=None):
+    return cls.grammar_name
+
+REST_OF_LINE = ANY_EXCEPT("\r\n", min=0, grammar_name="REST_OF_LINE", grammar_desc="rest of the line")
 
 ###############################################################################
 

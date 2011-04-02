@@ -9,14 +9,14 @@ compilers or interpreters.
 Some features include:
 
 * Pure-Python cross-platform design.
-* Grammar definitions are done using standard Python syntax.
+* Grammar definitions are created using standard Python syntax.
 * Supports arbitrarily complex grammars, including recursion.
-* Defining a grammar automatically creates a working parser for that grammar in
-  the process.
+* Defining a grammar automatically creates a working parser in the process (no
+  compilation steps or lengthy startup times).
 * Parse results contain full parse-tree information, including heirarchical
   tokenization of the input.
 * Parse result objects can be given custom methods and behaviors as part of the
-  grammar definition.
+  grammar definition, producing rich data objects.
 * Modular grammar design supports distributing grammars as python library
   modules, combining grammars from multiple sources into larger grammars, and
   even parameterized grammar definitions.

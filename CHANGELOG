@@ -1,9 +1,11 @@
-Version 0.7pre: 2011-03-29 Alex Stewart <alex@foogod.com>
+Version 0.7pre: 2011-04-01 Alex Stewart <alex@foogod.com>
   * Added support for pickling result objects
-  * Fixed some issues where grammar_whitespace was not being set correctly on
-    some constructs.
   * Added the ability to use a custom regular expression for whitespace-handling
   * Made grammar classes compare equal if they are equivalent.
+  * Added a bunch more unit tests
+  * Fixed some issues where grammar_whitespace was not being set correctly on
+    some constructs.
+  * Fixed a bunch of misc whitespace parsing bugs
 
 Version 0.6: 2011-03-04 Alex Stewart <alex@foogod.com>
   * First packaged version
