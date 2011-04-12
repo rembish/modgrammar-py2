@@ -1,4 +1,4 @@
-Version 0.7pre: 2011-04-01 Alex Stewart <alex@foogod.com>
+Version 0.7: 2011-04-12 Alex Stewart <alex@foogod.com>
   * Added support for pickling result objects
   * Added the ability to use a custom regular expression for whitespace-handling
   * Made grammar classes compare equal if they are equivalent.

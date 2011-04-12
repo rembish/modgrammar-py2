@@ -2,6 +2,6 @@ The documentation in this directory is in RST format suitable for processing
 with Sphinx.
 
 To generate the full (HTML) documentation, install Sphinx and then use the
-'python3 setup.py build_sphinx'.
+'python3 setup.py build_sphinx' command.  The resulting HTML documentation can then be found in the ../build/html directory.
 
 Note: Sphinx v1.1 or later is required for Py3 support.

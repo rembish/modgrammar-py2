@@ -67,7 +67,6 @@ Overridable Class Methods
    .. automethod:: Grammar.grammar_ebnf_lhs
    .. automethod:: Grammar.grammar_ebnf_rhs
    .. automethod:: Grammar.grammar_parse
-   .. automethod:: Grammar.grammar_equal
    .. automethod:: Grammar.grammar_collapsed_elems
 
 Useful Class Methods
