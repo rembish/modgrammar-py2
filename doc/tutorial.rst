@@ -319,15 +319,15 @@ Customizing General Behaviors
 Whitespace Handling
 ^^^^^^^^^^^^^^^^^^^
 
-Up to now we've been sorta glossing over one of the default behaviors of these grammars: whitespace handling.  As you may or may not have noticed, up to now all of our grammars have been whitespace-consuming, meaning that they automatically allow any amount of whitespace to come between two tokens, and will skip right over it.  Thus, in our :class:`Expression` grammar above, it would match not only "1+1", but also "1 + 1", or even "1\t+\r1" all equally.  This is convenient for many applications where whitespace really doesn't matter, but what if it should?
+Up to now we've been sorta glossing over one of the default behaviors of these grammars: whitespace handling.  As you may or may not have noticed, up to now all of our grammars have been whitespace-consuming, meaning that they automatically allow any amount of whitespace to come between two tokens, and will skip right over it.  Thus, in our :class:`Expression` grammar above, it would match not only "1+1", but also "1 + 1", or even "1\\t+\\r1" all equally.  This is convenient for many applications where whitespace really doesn't matter, but what if it should?
 
 Luckily, this behavior is configurable.  If you would prefer that your grammar *not* quietly ignore whitespace, there are a couple of ways to do this:
 
-# If you only want to change this for certain grammar classes, you can set the *grammar_whitespace* attribute of the classes to :const:`False` when you define them.  This is good for one or two classes, but is not really ideal if you want this to be the case for your entire grammar, as not only do you need to set it for every class definition, but you will also need to make sure to explicitly set it (via the *whitespace* parameter) whenever you use :func:`~modgrammar.REPEAT`, :func:`LIST_OF`, :func:`GRAMMAR`, etc, etc.
+#. If you only want to change this for certain grammar classes, you can set the *grammar_whitespace* attribute of the classes to :const:`False` when you define them.  This is good for one or two classes, but is not really ideal if you want this to be the case for your entire grammar, as not only do you need to set it for every class definition, but you will also need to make sure to explicitly set it (via the *whitespace* parameter) whenever you use :func:`~modgrammar.REPEAT`, :func:`~modgrammar.LIST_OF`, :func:`~modgrammar.GRAMMAR`, etc, etc.
 
-# You can set ``modgrammar.grammar_whitespace = False``.  This will cause the *grammar_whitespace* attribute on all grammar classes default to :const:`False`.  Note, however, that this will change the behavior of *all* grammars by default, even grammars in other modules which may use the same instance of :mod:`modgrammar`, so this is generally not recommended.
+#. You can set ``modgrammar.grammar_whitespace = False``.  This will cause the *grammar_whitespace* attribute on all grammar classes default to :const:`False`.  Note, however, that this will change the behavior of *all* grammars by default, even grammars in other modules which may use the same instance of :mod:`modgrammar`, so this is generally not recommended.
 
-# The best way, usually, is to set ``grammar_whitespace = False`` at the module level of the module in which you're defining your grammar classes.  Whenever you create a grammar class, :mod:`modgrammar` will look for this setting at the module level and use it instead of the global default, if found.
+#. The best way, usually, is to set ``grammar_whitespace = False`` at the module level of the module in which you're defining your grammar classes.  Whenever you create a grammar class, :mod:`modgrammar` will look for this setting at the module level and use it instead of the global default, if found.
 
 Tip: Even if you do want your grammars to skip whitespace, it's a good idea to set *grammar_whitespace* explicitly at the beginning of your module just to be sure.  This way, if somehow the global ``modgrammar.grammar_whitespace`` gets set to something different than you expect, it won't affect any of your defined grammar classes.
 
@@ -387,7 +387,7 @@ In many applications, for example, you may not actually care about the whole par
 
    >>> result = myparser.parse_string("Hello, cruel world, my name is Inigo Montoya!")
    >>> result[2].elements
-   (WorldPhrase<'wonderful', 'world'>, L(',')<','>, MyNameIs<'my name is', 'Inigo', 'Montoya'>)
+   (WorldPhrase<'cruel', 'world'>, L(',')<','>, MyNameIs<'my name is', 'Inigo', 'Montoya'>)
 
 Now let's say in this case all we really care about is finding out the person's first name.  We could traverse the whole tree, pulling out result[2], going through each one, checking to see if it's a MyNameIs, then pulling out the right sub-element of that, etc, but actually we don't have to.  Since we know we're looking for an occurrence of :class:`FirstName`, we can just ask the result object to find it and return it for us using :meth:`~modgrammar.Grammar.find`::
 
