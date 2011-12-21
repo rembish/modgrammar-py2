@@ -57,6 +57,12 @@ class InternalError (Exception):
   """
   pass
 
+class GrammarDefError (Exception):
+  """
+  This exception is raised when creating/defining new grammar classes if there is a problem with the definition which cannot be resolved.
+  """
+  pass
+
 class ReferenceError (Exception):
   """
   This is the base class for :exc:`UnknownReferenceError` and :exc:`BadReferenceError`.  It can be used to easily catch either exception.

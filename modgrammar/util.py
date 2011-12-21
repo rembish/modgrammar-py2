@@ -45,7 +45,7 @@ def regularize(grammar):
       result.extend(regularize(g))
     return tuple(result)
   except TypeError:
-    raise GrammarDefError("object of type '%s' cannot be converted to Grammar" % (type(grammar).__name__,))
+    raise modgrammar.GrammarDefError("object of type '%s' cannot be converted to Grammar" % (type(grammar).__name__,))
 
 _anongrammar_attrs = ('grammar_collapse', 'grammar_desc', 'grammar_name', 'grammar_whitespace', 'grammar_tags')
 
