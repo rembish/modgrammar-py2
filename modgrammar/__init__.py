@@ -364,9 +364,9 @@ class GrammarParser:
     elif matchtype == 'last':
       count, obj = matches[-1]
     elif matchtype == 'longest':
-      count, obj = max(matches)
+      count, obj = max(matches, key=lambda m: m[0])
     elif matchtype == 'shortest':
-      count, obj = min(matches)
+      count, obj = min(matches, key=lambda m: m[0])
     elif matchtype == 'all':
       objs = [x[1] for x in matches]
       count = max(x[0] for x in matches)
