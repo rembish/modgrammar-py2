@@ -412,7 +412,8 @@ class GrammarParser:
       if count is None:
         # Partial match
         break
-      self.update_pos(count)
+      elif matchtype != 'all':
+        self.skip(count)
       yield obj
       if not count:
 	# We matched a zero-length string.  If we keep looping, we'll just loop
@@ -449,7 +450,7 @@ class GrammarParser:
           "shortest"
             The match which uses up the shortest portion of the input text.
           "all"
-            Return all possible matches, in a list.
+            Return all possible matches, in a list.  Note that in this case the buffer position will not be automatically advanced.  You must call :func:`~GrammarParser.skip` manually.
       *bol*
         Treat the input text as starting at the beginning of a line (for the purposes of matching the :const:`BOL` grammar element).  It is not usually necessary to specify this explicitly.
     """
@@ -470,6 +471,8 @@ class GrammarParser:
     Attempt to match a list (or actually any iterable) of strings against the associated grammar.  This is effectively the same as calling :meth:`parse_string` repeatedly for each string in the list to obtain all matches in sequence.
 
     Return values, exceptions, and optional parameters are all exactly the same as for :meth:`parse_string`.
+
+    Note: Be careful using ``matchtype="all"`` with parse_lines/parse_file.  You must manually call :func:`~GrammarParser.skip` after each yielded match, or you will end up with an infinite loop!
     """
     if reset:
       self.reset()
@@ -488,6 +491,8 @@ class GrammarParser:
     Open and process the contents of a file using the associated grammar.  This is basically the same as opening the specified file, and passing the resulting file object to :meth:`parse_lines`.
 
     Return values, exceptions, and optional parameters are all exactly the same as for :meth:`parse_string`.
+
+    Note: Be careful using ``matchtype="all"`` with parse_lines/parse_file.  You must manually call :func:`~GrammarParser.skip` after each yielded match, or you will end up with an infinite loop!
     """
     if isinstance(file, str):
       with open(file, "r") as f:
@@ -497,8 +502,14 @@ class GrammarParser:
       for result in self.parse_lines(file, bol=bol, eof=eof, reset=reset, data=data, matchtype=matchtype):
         yield result
 
-  def update_pos(self, count):
+  def skip(self, count):
+    """
+    Skip forward the specified number of characters in the input buffer (discarding the text skipped over).
+    """
+
     if count:
+      if count > len(self.text.string):
+        raise ValueError("Attempt to skip past end of available buffer.")
       # The state may contain index values in it, which will become invalid if
       # we change the starting point, so we (unfortunately) need to nuke it.
       self.state = (None, None)
@@ -938,7 +949,7 @@ class Grammar (metaclass=GrammarClass):
     return self.elements[index]
 
   def __len__(self):
-    return len(self.elements)
+    return len(self.string)
 
   def __bool__(self):
     return bool(self.elements) or self.grammar_terminal

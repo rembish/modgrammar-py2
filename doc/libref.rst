@@ -127,6 +127,7 @@ Parser Objects
    .. automethod:: GrammarParser.remainder
    .. automethod:: GrammarParser.clear_remainder
    .. automethod:: GrammarParser.reset
+   .. automethod:: GrammarParser.skip
 
 Built-In Grammars
 =================

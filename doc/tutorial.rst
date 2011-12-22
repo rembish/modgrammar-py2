@@ -659,7 +659,7 @@ Up to now, we've been using :meth:`~modgrammar.GrammarParser.parse_string` in it
       "shortest"
          The parser will return the match which uses up the shortest portion of the input text.
       "all"
-         For each match, instead of returning one result object, the parser will return all possible result objects, in a list.  Note that in this case, the parser will consider the match to consume as much of the text as was matched by the longest result, and will also advance the buffer that far.
+         For each match, instead of returning one result object, the parser will return all possible result objects, in a list.  Note that in this case, the parser will not consume any of the text in the input buffer or advance the buffer position (because it's not obvious which match length to use).  You must do this manually by calling :func:`~modgrammar.GrammarParser.skip` after each successful match.
 
       (It should be fairly obvious that "first" can be much more efficient than the other options, as the parser can stop after it gets the first match.  For all the other choices, the parser must keep trying until it finds all possible matches before it can decide which one to return.)
 
