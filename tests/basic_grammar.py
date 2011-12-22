@@ -632,3 +632,44 @@ class TestExcept (util.BasicGrammarTestCase):
     self.check_sanity(g, (modgrammar.ExceptionGrammar, Literal))
     self.assertEqual(g.grammar[0].grammar[1].string, 'DEF')
 
+class TestNotFollowedBy (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = NOT_FOLLOWED_BY('A')
+    self.grammar_name = "<NOT_FOLLOWED_BY>"
+    self.grammar_details = "NOT_FOLLOWED_BY(L('A'))"
+    self.subgrammar_types = (Literal,)
+    self.expected_match_types = (NoneType,)
+    self.matches_with_remainder = ('B', 'C')
+    self.fail_matches = ('A',)
+
+class TestNotFollowedBy2 (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = GRAMMAR('A', NOT_FOLLOWED_BY('B'))
+    self.terminal = False
+    self.grammar_name = "<GRAMMAR>"
+    self.grammar_details = "(L('A'), NOT_FOLLOWED_BY(L('B')))"
+    self.subgrammar_types = (Literal, modgrammar.NotFollowedBy)
+    self.matches_with_remainder = ('AA', 'AC')
+    self.fail_matches = ('AB',)
+    self.partials = (('A', 'A'), )
+    self.fail_partials = (('A', 'B'),)
+
+  def num_tokens_for(self, teststr):
+    return (1, 1)
+
+class TestNotFollowedBy3 (util.BasicGrammarTestCase):
+  def setUp(self):
+    self.grammar = GRAMMAR('A', NOT_FOLLOWED_BY('B'), ANY)
+    self.terminal = False
+    self.grammar_name = "<GRAMMAR>"
+    self.grammar_details = "(L('A'), NOT_FOLLOWED_BY(L('B')), ANY)"
+    self.subgrammar_types = (Literal, modgrammar.NotFollowedBy, ANY)
+    self.matches = ('AA', 'AC')
+    self.matches_with_remainder = ('AAC',)
+    self.fail_matches = ('AB', 'ABC')
+    self.partials = (('A', 'A'), )
+    self.fail_partials = (('A', 'B'),)
+
+  def num_tokens_for(self, teststr):
+    return (2, 2)
+

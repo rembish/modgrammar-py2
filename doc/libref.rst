@@ -164,6 +164,7 @@ The following basic grammar classes/factories are provided from which more compl
 .. autofunction:: ZERO_OR_MORE
 .. autofunction:: ONE_OR_MORE
 .. autofunction:: LIST_OF(*grammar, sep=",", **kwargs)
+.. autofunction:: NOT_FOLLOWED_BY
 
 .. data:: ANY
 

@@ -21,7 +21,7 @@ __all__ = [
     "ReferenceError", "UnknownReferenceError", "BadReferenceError", "ParseError", "Grammar",
     "Terminal",
     "Literal", "Word", "Repetition", "ListRepetition", "Reference",
-    "GRAMMAR", "G", "ANY", "EMPTY", "REF", "LITERAL", "L", "OR", "EXCEPT", "WORD", "REPEAT", "LIST_OF", "OPTIONAL",
+    "GRAMMAR", "G", "ANY", "EMPTY", "REF", "LITERAL", "L", "OR", "EXCEPT", "WORD", "REPEAT", "LIST_OF", "OPTIONAL", "NOT_FOLLOWED_BY",
     "ZERO_OR_MORE", "ONE_OR_MORE", "ANY_EXCEPT", "BOL", "EOL", "EOF",
     "REST_OF_LINE", "SPACE",
     "generate_ebnf",
@@ -1096,6 +1096,16 @@ class OR_Operator (Grammar):
   grammar_whitespace = False
 
   @classmethod
+  def __class_init__(cls, attrs):
+    if not "grammar_desc" in attrs and cls.grammar:
+      # This is not used directly when constructing ParseExceptions (because we
+      # never return ourselves as a failure class, we only return the failures
+      # from our subgrammars), but is needed by some other grammars which
+      # construct their grammar_desc based on their subgrammar's grammar_descs
+      # (i.e. NOT())
+      cls.grammar_desc = " or ".join(g.grammar_desc for g in cls.grammar)
+
+  @classmethod
   def grammar_parse(cls, text, index, sessiondata):
     best_error = None
     for g in cls.grammar:
@@ -1127,6 +1137,69 @@ class OR_Operator (Grammar):
   def grammar_ebnf_lhs(cls, opts):
     names, nts = util.get_ebnf_names(cls.grammar, opts)
     return ("( "+" | ".join(names)+" )", nts)
+
+  @classmethod
+  def grammar_ebnf_rhs(cls, opts):
+    return None
+
+def NOT_FOLLOWED_BY(*grammar, **kwargs):
+  """
+  Returns a successful match as long as the next text after this point does NOT match the specified grammar.
+
+  When successful (that is, the next text in the input does not match the specified grammar), this element of the parse tree will contain :const:`None`, and no input text will be consumed.  When unsuccessful (that is, the next text does match), a :exc:`ParseError` will be raised.
+  """
+  cdict = util.make_classdict(NotFollowedBy, grammar, kwargs)
+  return GrammarClass("<NOT_FOLLOWED_BY>", (NotFollowedBy,), cdict)
+
+class NotFollowedBy (Grammar):
+  grammar_whitespace = False
+  grammar_collapse = True
+
+  @classmethod
+  def __class_init__(cls, attrs):
+    if not cls.grammar:
+      cls.grammar = (EMPTY,)
+    else:
+      cls.grammar = (GRAMMAR(cls.grammar),)
+    if not "grammar_desc" in attrs and cls.grammar:
+      cls.grammar_desc = "anything except {}".format(cls.grammar[0].grammar_desc)
+
+  @classmethod
+  def grammar_parse(cls, text, index, sessiondata):
+    best_error = None
+    g = cls.grammar[0]
+    results = g.grammar_parse(text, index, sessiondata)
+    count, obj = next(results)
+    while count is None:
+      if text.eof:
+        # Subgrammars should not be asking for more data after eof.
+        raise InternalError("{} requested more data when at EOF".format(g))
+      text = yield (None, None)
+      count, obj = results.send(text)
+    if count is not False:
+      # The subgrammar matched.  That means we should consider this a parse
+      # error.
+      yield error_result(index, cls)
+    else:
+      # Subgrammar did not match.  Return a (successful) None match.
+      yield (0, cls(''))
+    
+  @classmethod
+  def grammar_details(cls, depth=-1, visited=None):
+    if not visited:
+      visited = (cls,)
+    elif cls in visited:
+      # Circular reference.  Stop here.
+      return cls.grammar_name
+    else:
+      visited = visited + (cls,)
+    return "NOT_FOLLOWED_BY({})".format(cls.grammar[0].grammar_details(depth, visited))
+
+  @classmethod
+  def grammar_ebnf_lhs(cls, opts):
+    sub_lhs, sub_nts = cls.grammar[0].grammar_ebnf_lhs(opts)
+    desc = "not followed by {}".format(sub_lhs)
+    return (util.ebnf_specialseq(cls, opts, desc=desc), (cls.grammar[0],))
 
   @classmethod
   def grammar_ebnf_rhs(cls, opts):

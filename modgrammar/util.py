@@ -145,14 +145,14 @@ def get_ebnf_names(glist, opts):
         nts.append(nt)
   return (names, nts)
 
-def ebnf_specialseq(grammar, opts):
+def ebnf_specialseq(grammar, opts, name=None, details=None, desc=None):
   style = opts['special_style']
   if style == 'python':
-    text = grammar.grammar_details()
+    text = details or grammar.grammar_details()
   elif style == 'name':
-    text = grammar.grammar_name
+    text = name or grammar.grammar_name
   else:
-    text = getattr(grammar, 'grammar_desc', None)
+    text = desc or getattr(grammar, 'grammar_desc', None)
     if not text:
-      text = grammar.grammar_name
+      text = name or grammar.grammar_name
   return '? {} ?'.format(text)
