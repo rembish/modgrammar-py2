@@ -32,6 +32,10 @@ Class Attributes
 
       A descriptive string for the grammar to be used in :exc:`ParseError` error messages. (Defaults to the same value as :attr:`grammar_name`.)
 
+   .. attribute:: Grammar.grammar_error_override
+
+      If set, this grammar will report all match failures by its subgrammars as if it had failed itself.  This effectively "hides" the subgrammars in any :exc:`ParseError` (which will use this grammar's location and :attr:`grammar_desc` instead when constructing error messages, etc).
+
    .. attribute:: Grammar.grammar_whitespace
 
       If set to :const:`True` (the default), this grammar will automatically skip over any whitespace found between its sub-grammars (it will be "whitespace consuming").  If set to :const:`False`, whitespace between elements will not be treated specially.

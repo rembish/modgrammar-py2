@@ -516,7 +516,7 @@ class GrammarParser:
 #                            Base (public) Classes                            #
 ###############################################################################
 
-class Grammar(metaclass=GrammarClass):
+class Grammar (metaclass=GrammarClass):
   """
   This class is not intended to be instantiated directly.  Instead, it is a base class to be used for defining your own custom grammars.
 
@@ -531,6 +531,7 @@ class Grammar(metaclass=GrammarClass):
   grammar_greedy = True
   grammar_null_subtoken_ok = True
   grammar_whitespace = None
+  grammar_error_override = False
   grammar_hashattrs = ('grammar_name', 'grammar', 'grammar_min', 'grammar_max', 'grammar_collapse', 'grammar_greedy', 'grammar_whitespace')
 
   @classmethod
@@ -574,6 +575,7 @@ class Grammar(metaclass=GrammarClass):
     positions = []
     best_error = None
     pos = index
+    first_pos = None
 
     while True:
       # Forward ho!
@@ -598,6 +600,8 @@ class Grammar(metaclass=GrammarClass):
             if pos < len(text.string) or text.eof:
               break
             text = yield (None, None)
+        if first_pos is None:
+          first_pos = pos
         s = grammar[len(objs)].grammar_parse(text, pos, sessiondata)
         offset, obj = next(s)
         while offset is None:
@@ -617,8 +621,8 @@ class Grammar(metaclass=GrammarClass):
       # find something else to follow...
       while True:
         if greedy and len(objs) >= grammar_min:
-	  # If we are greedy, then return matches only after we"ve gone as far
-	  # forward as possible, while we"re backtracking (returns the longest
+	  # If we are greedy, then return matches only after we've gone as far
+	  # forward as possible, while we're backtracking (returns the longest
 	  # matches first)
           yield (pos - index, cls(text.string, index, pos, objs))
 	  # We need to copy objs for any further stuff, since it's now part of
@@ -648,7 +652,21 @@ class Grammar(metaclass=GrammarClass):
       # If so, give up.  If not, loop around and try going forward again.
       if not states:
         break
-    yield error_result(*best_error)
+    if cls.grammar_error_override:
+      # If our sub-grammars failed to match, but we've got
+      # grammar_error_override set, return ourselves as the failed match
+      # grammar instead.
+      yield error_result(index, cls)
+    elif ((len(cls.grammar) == 1)
+         and (best_error[0] == first_pos)
+         and (cls.grammar_desc != cls.grammar_name) ):
+      # We're just a simple wrapper (i.e. an alias) around another single
+      # grammar class, and it failed to match, and we have a custom
+      # grammar_desc.  Return ourselves as the failed match grammar so the
+      # ParseError will contain our grammar_desc instead.
+      yield error_result(index, cls)
+    else:
+      yield error_result(*best_error)
 
   @classmethod
   def grammar_ebnf_lhs(cls, opts):
@@ -1260,7 +1278,8 @@ class ExceptionGrammar (Grammar):
     # obvious there were extra conditions on the match that weren't fulfilled.
     if best_error[0] == index:
       yield error_result(index, cls)
-    yield error_result(*best_error)
+    else:
+      yield error_result(*best_error)
     
   @classmethod
   def grammar_details(cls, depth=-1, visited=None):
@@ -1684,6 +1703,8 @@ def generate_ebnf(grammar, **opts):
       The number of characters that subsequent (wrapped) lines should be indented.  Can be set to either a number or to :const:`True`.  If set to :const:`True`, the indent will be auto-calculated to line up with the position of the RHS in the first line.
     *expand_terminals* (default False)
       If grammars have subgrammars, show their expansion even if :attr:`~Grammar.grammar_terminal` is true.
+    *special_style* (default "desc")
+      How some grammars (which can't be easily represented as EBNF) should be represented inside EBNF "special sequences".  Valid options are "desc" (use the (human-readable) :attr:`~Grammar.grammar_desc` text), "name" (just use the grammar's name), or "python" (use a repr-like syntax similar to the python syntax used to create them).
 
   Additional options may also be offered by certain individual grammars.
   """

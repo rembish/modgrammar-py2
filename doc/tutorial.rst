@@ -732,6 +732,8 @@ Now, the default message of the :exc:`ParseError` exception attempts to give a p
 
 Luckily, this behavior is customizable.  The :attr:`~modgrammar.Grammar.grammar_desc` attribute of a grammar class is what :exc:`ParseError`\ s use for this purpose, so if you want to you can override this to change what gets printed for a given grammar.  Note, however, that in most cases it won't be your (custom) grammar that fails to match, but rather one of its sub-grammars (such as a :func:`~modgrammar.LITERAL` or :func:`~modgrammar.WORD`) instead, so most of the time you'll actually need to change their :attr:`~modgrammar.Grammar.grammar_desc` attributes, which can be done by passing the *desc* keyword argument when you create them.
 
+But what if that's too much detail?  Sometimes exposing the all the niggly details of the sub-grammar is really more information than you (or your end users) want.  In this case, you can also hide the sub-grammars from :exc:`~modgrammar.ParseError` results by setting the :attr:`~modgrammar.Grammar.grammar_error_override` attribute on a parent grammar.  If this is set, then any time there's a failure in one of the sub-grammars, it will pretend that the parent grammar failed as a whole, and will report it (and its :attr:`~modgrammar.Grammar.grammar_desc`) as the failure instead.  (Note that if you do this, you will probably want to set your own custom :attr:`~modgrammar.Grammar.grammar_desc` at the same time.)
+
 Optional Extras
 ---------------
 
