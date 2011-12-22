@@ -351,6 +351,16 @@ class GrammarParser:
           # string, so ignore the error.
           return (None, None)
         errpos, expected = obj
+        if errpos == len(self.text.string) and self.grammar.grammar_whitespace:
+	  # If we hit EOF and this grammar is whitespace-consuming, check to
+	  # see whether we had only whitespace before the EOF.  If so, treat
+	  # this like the pos == len(self.text.string) case above.
+          whitespace_re = self.grammar.grammar_whitespace
+          if whitespace_re is True:
+            whitespace_re = util._whitespace_re
+          m = whitespace_re.match(self.text.string, pos)
+          if m and m.end() == len(self.text.string):
+            return (None, None)
         char = self.char + errpos
         line, col = util.calc_line_col(self.text.string, errpos, self.line, self.col, self.tabs)
         raise ParseError(self.grammar, self.text.string, errpos, char, line=line, col=col, expected=expected)
