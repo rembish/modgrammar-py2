@@ -1,3 +1,14 @@
+Version 0.8: 2011-12-22 Alex Stewart <alex@foogod.com>
+  * Added NOT_FOLLOWED_BY grammar construct
+  * Added grammar_error_override option
+  * matchtype="all" no longer auto-advances the buffer position
+  * New GrammarParser.skip() method
+  * Fixed Issue 1: matchtype="longest" or "shortest" breaks when possible
+    matches are the same length.
+  * Fixed Issue 2: GrammarDefError undefined
+  * Fixed Issue 3: Misc documentation fixups
+  * Fixed Issue 4: Whitespace before EOF confuses parse_lines
+
 Version 0.7: 2011-04-12 Alex Stewart <alex@foogod.com>
   * Added support for pickling result objects
   * Added the ability to use a custom regular expression for whitespace-handling
