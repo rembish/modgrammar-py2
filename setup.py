@@ -13,14 +13,14 @@ from distutils import log
 from pkg_utils import *
 
 setup(
-    name='modgrammar',
+    name='modgrammar-py2',
     version=pkg_version,
     url='http://code.google.com/p/modgrammar',
-    download_url='http://pypi.python.org/pypi/modgrammar',
+    download_url='https://github.com/don-ramon/modgrammar-py2',
     license='BSD',
     author='Alex Stewart',
     author_email='alex@foogod.com',
-    description='Modular grammar-parsing engine',
+    description='Modular grammar-parsing engine (Python 2.6+ backport)',
     long_description=pkg_readme,
     zip_safe=True,
     classifiers=[
