@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import sys
 import re
 import textwrap
@@ -130,7 +132,7 @@ class ParseError (Exception):
           found_txt = repr(found_txt)
         else:
           found_txt = "(end of input)"
-        message = "Expected {}: Found {}".format(expected_txt, found_txt)
+        message = "Expected {0}: Found {1}".format(expected_txt, found_txt)
     self.buffer = buf
     self.buffer_pos = pos
     self.char = char
@@ -142,13 +144,13 @@ class ParseError (Exception):
   def __str__(self):
     lc = []
     if self.line is not None:
-      lc.append("line {}".format(self.line + 1))
+      lc.append("line {0}".format(self.line + 1))
     if self.col is not None:
-      lc.append("column {}".format(self.col + 1))
+      lc.append("column {9}".format(self.col + 1))
     if lc:
-      return "[{}] {}".format(", ".join(lc), self.message)
+      return "[{0}] {1}".format(", ".join(lc), self.message)
     else:
-      return "[char {}] {}".format(self.char + 1, self.message)
+      return "[char {0}] {1}".format(self.char + 1, self.message)
 
 ###############################################################################
 #                           Core (internal) Classes                           #
@@ -220,7 +222,7 @@ class GrammarClass (type):
       # Python hashability requires that once something obtains our hash, it
       # should never change, so we just consider these attributes read-only if
       # our hash value has ever been calculated before.
-      raise AttributeError("Changing the value of the {!r} attribute would change the hash value of the object.".format(attr))
+      raise AttributeError("Changing the value of the {0!r} attribute would change the hash value of the object.".format(attr))
     return type.__setattr__(cls, attr, value)
 
   def __hash__(cls):
@@ -394,7 +396,7 @@ class GrammarParser:
         pp_objs.append(result)
       return (count, pp_objs)
     else:
-      raise ValueError("Invalid value for 'matchtype' parameter: {!r}".format(matchtype))
+      raise ValueError("Invalid value for 'matchtype' parameter: {0!r}".format(matchtype))
 
     result = obj.grammar_postprocess(None, data)
     if len(result) == 1:
@@ -527,7 +529,8 @@ class GrammarParser:
 #                            Base (public) Classes                            #
 ###############################################################################
 
-class Grammar (metaclass=GrammarClass):
+class Grammar (object):
+  __metaclass__ = GrammarClass
   """
   This class is not intended to be instantiated directly.  Instead, it is a base class to be used for defining your own custom grammars.
 
@@ -618,7 +621,7 @@ class Grammar (metaclass=GrammarClass):
         while offset is None:
           if text.eof:
             # Subgrammars should not be asking for more data after eof.
-            raise InternalError("{} requested more data when at EOF".format(grammar[len(objs)]))
+            raise InternalError("{0} requested more data when at EOF".format(grammar[len(objs)]))
           text = yield (None, None)
           offset, obj = s.send(text)
         if offset is False:
@@ -648,7 +651,7 @@ class Grammar (metaclass=GrammarClass):
         while offset is None:
           if text.eof:
             # Subgrammars should not be asking for more data after eof.
-            raise InternalError("{} requested more data when at EOF".format(grammar[len(objs)-1]))
+            raise InternalError("{0} requested more data when at EOF".format(grammar[len(objs)-1]))
           text = yield (None, None)
           offset, obj = s.send(text)
         if offset is False:
@@ -747,9 +750,9 @@ class Grammar (metaclass=GrammarClass):
     name = cls.grammar_name
     details = cls.grammar_details(1)
     if name == details or name.startswith("<"):
-      return "<Grammar: {}>".format(details)
+      return "<Grammar: {0}>".format(details)
     else:
-      return "<Grammar[{}]: {}>".format(name, details)
+      return "<Grammar[{0}]: {1}>".format(name, details)
 
   @classmethod
   def grammar_hashdata(cls):
@@ -962,7 +965,7 @@ class Grammar (metaclass=GrammarClass):
     details = [repr(str(e) if e is not None else e) for e in self.elements]
     if not details:
       details = (repr(self.string),)
-    return "{}<{}>".format(name, ", ".join(details))
+    return "{0}<{1}>".format(name, ", ".join(details))
 
   def __reduce__(self):
     # This allows pickling of result objects based on classes which were dynamically generated at runtime (such as the results of LITERAL and WORD).  Normally, these are not pickleable because any pickleable object must be an instance of a class which can be looked up (by name) in the module's dictionary.  We provide a special function to unpickle such objects which will recreate the dynamic class first, and then provide an instance for the unpickler to use.
@@ -1027,7 +1030,7 @@ class Literal (Terminal):
   @classmethod
   def __class_init__(cls, attrs):
     if "grammar_name" not in attrs:
-      cls.grammar_name = "L({!r})".format(cls.string)
+      cls.grammar_name = "L({0!r})".format(cls.string)
     if "grammar_desc" not in attrs:
       cls.grammar_desc = repr(cls.string)
 
@@ -1143,7 +1146,7 @@ class OR_Operator (Grammar):
         while count is None:
           if text.eof:
             # Subgrammars should not be asking for more data after eof.
-            raise InternalError("{} requested more data when at EOF".format(g))
+            raise InternalError("{0} requested more data when at EOF".format(g))
           text = yield (None, None)
           count, obj = results.send(text)
         if count is False:
@@ -1191,7 +1194,7 @@ class NotFollowedBy (Grammar):
     else:
       cls.grammar = (GRAMMAR(cls.grammar),)
     if not "grammar_desc" in attrs and cls.grammar:
-      cls.grammar_desc = "anything except {}".format(cls.grammar[0].grammar_desc)
+      cls.grammar_desc = "anything except {0}".format(cls.grammar[0].grammar_desc)
 
   @classmethod
   def grammar_parse(cls, text, index, sessiondata):
@@ -1202,7 +1205,7 @@ class NotFollowedBy (Grammar):
     while count is None:
       if text.eof:
         # Subgrammars should not be asking for more data after eof.
-        raise InternalError("{} requested more data when at EOF".format(g))
+        raise InternalError("{0} requested more data when at EOF".format(g))
       text = yield (None, None)
       count, obj = results.send(text)
     if count is not False:
@@ -1222,12 +1225,12 @@ class NotFollowedBy (Grammar):
       return cls.grammar_name
     else:
       visited = visited + (cls,)
-    return "NOT_FOLLOWED_BY({})".format(cls.grammar[0].grammar_details(depth, visited))
+    return "NOT_FOLLOWED_BY({0})".format(cls.grammar[0].grammar_details(depth, visited))
 
   @classmethod
   def grammar_ebnf_lhs(cls, opts):
     sub_lhs, sub_nts = cls.grammar[0].grammar_ebnf_lhs(opts)
-    desc = "not followed by {}".format(sub_lhs)
+    desc = "not followed by {0}".format(sub_lhs)
     return (util.ebnf_specialseq(cls, opts, desc=desc), (cls.grammar[0],))
 
   @classmethod
@@ -1249,7 +1252,7 @@ class ExceptionGrammar (Grammar):
   @classmethod
   def __class_init__(cls, attrs):
     if not "grammar_desc" in attrs and cls.grammar:
-      cls.grammar_desc = "{} except {}".format(cls.grammar[0].grammar_desc, cls.grammar[1].grammar_desc)
+      cls.grammar_desc = "{0} except {1}".format(cls.grammar[0].grammar_desc, cls.grammar[1].grammar_desc)
 
   @classmethod
   def grammar_parse(cls, text, index, sessiondata):
@@ -1261,7 +1264,7 @@ class ExceptionGrammar (Grammar):
       while count is None:
         if text.eof:
           # Subgrammars should not be asking for more data after eof.
-          raise InternalError("{} requested more data when at EOF".format(g))
+          raise InternalError("{0} requested more data when at EOF".format(g))
         text = yield (None, None)
         count, obj = results.send(text)
       if count is False:
@@ -1274,7 +1277,7 @@ class ExceptionGrammar (Grammar):
       for e_count, e_obj in exc.grammar_parse(exc_text, index, sessiondata):
         if e_count is None:
           # Subgrammars should not be asking for more data after eof.
-          raise InternalError("{} requested more data when at EOF".format(g))
+          raise InternalError("{0} requested more data when at EOF".format(g))
         if e_count is False:
           break
         found = True
@@ -1338,18 +1341,18 @@ class Repetition (Grammar):
   @classmethod
   def grammar_details(cls, depth=-1, visited=None):
     if cls.grammar_min == 0 and cls.grammar_max == 1 and cls.grammar_collapse:
-      return "OPTIONAL({})".format(cls.grammar[0].grammar_details(depth, visited))
+      return "OPTIONAL({0})".format(cls.grammar[0].grammar_details(depth, visited))
     params = ""
     if cls.grammar_min == cls.grammar_max:
-      params += ", count={}".format(cls.grammar_min)
+      params += ", count={0}".format(cls.grammar_min)
     else:
       if cls.grammar_min != 1:
-        params += ", min={}".format(cls.grammar_min)
+        params += ", min={0}".format(cls.grammar_min)
       if cls.grammar_max != sys.maxsize:
-        params += ", max={}".format(cls.grammar_max)
+        params += ", max={0}".format(cls.grammar_max)
     if cls.grammar_collapse:
       params += ", collapse=True"
-    return "REPEAT({}{})".format(cls.grammar[0].grammar_details(depth, visited), params)
+    return "REPEAT({0}{1})".format(cls.grammar[0].grammar_details(depth, visited), params)
 
   @classmethod
   def grammar_resolve_refs(cls, refmap={}, recurse=True, follow=False, missing_ok=False, skip=None):
@@ -1366,24 +1369,24 @@ class Repetition (Grammar):
     names, nts = util.get_ebnf_names((cls.grammar[0],), opts)
     name = names[0]
     if "," in name:
-      ename = "( {} )".format(name)
+      ename = "( {0} )".format(name)
     else:
       ename = name
     if cls.grammar_min == 0 and cls.grammar_max == 1:
-      return ("[{}]".format(name), nts)
+      return ("[{0}]".format(name), nts)
     if cls.grammar_min == 0:
       descs = []
     elif cls.grammar_min == 1:
-      descs = ["{}".format(ename)]
+      descs = ["{0}".format(ename)]
     else:
-      descs = ["{} * {}".format(cls.grammar_min, ename)]
+      descs = ["{0} * {1}".format(cls.grammar_min, ename)]
     extra = cls.grammar_max - cls.grammar_min
     if cls.grammar_max == sys.maxsize:
-      descs.append("{{{}}}".format(name))  # "{%s}"
+      descs.append("{{{0}}}".format(name))  # "{%s}"
     elif extra == 1:
-      descs.append("[{}]".format(name))
+      descs.append("[{0}]".format(name))
     elif extra:
-      descs.append("{} * [{}]".format(extra, name))
+      descs.append("{0} * [{1}]".format(extra, name))
     return (", ".join(descs), nts)
 
   @classmethod
@@ -1419,18 +1422,18 @@ class Word (Terminal):
     restchars = re.sub('([\\]\\\\])', '\\\\\\1', restchars)
     max = cls.grammar_max
     if not max:
-      regexp = "[{}][{}]*".format(startchars, restchars)
+      regexp = "[{0}][{1}]*".format(startchars, restchars)
     else:
-      regexp = "[{}][{}]{{,{}}}".format(startchars, restchars, max-1)
+      regexp = "[{0}][{1}]{{,{2}}}".format(startchars, restchars, max-1)
     if cls.grammar_min < 1:
-      regexp = "({})?".format(regexp)
+      regexp = "({0})?".format(regexp)
     cls.regexp = re.compile(regexp)
     if "grammar_name" not in attrs:
       if cls.restchars is None:
         argspec = repr(startchars)
       else:
-        argspec = "{!r}, {!r}".format(startchars, restchars)
-      cls.grammar_name = "WORD({})".format(argspec)
+        argspec = "{0!r}, {1!r}".format(startchars, restchars)
+      cls.grammar_name = "WORD({0})".format(argspec)
     if "grammar_desc" not in attrs:
       cls.grammar_desc = cls.grammar_name
 
@@ -1441,14 +1444,14 @@ class Word (Terminal):
     if restchars is None:
       argspec = repr(startchars)
     else:
-      argspec = "{!r}, {!r}".format(startchars, restchars)
+      argspec = "{0!r}, {1!r}".format(startchars, restchars)
     min = cls.grammar_min
     max = cls.grammar_max
     if min != 1:
-      argspec += ", min={}".format(min)
+      argspec += ", min={0}".format(min)
     if max:
-      argspec += ", max={}".format(max)
-    return "WORD({})".format(argspec)
+      argspec += ", max={0}".format(max)
+    return "WORD({0})".format(argspec)
 
   @classmethod
   def grammar_parse(cls, text, index, sessiondata):
@@ -1510,7 +1513,7 @@ class Reference (Grammar):
 
   @classmethod
   def __class_init__(cls, attrs):
-    cls.grammar_name = "REF({!r})".format(cls.ref_name)
+    cls.grammar_name = "REF({0!r})".format(cls.ref_name)
     
   @classmethod
   def resolve(cls, sessiondata={}):
@@ -1594,15 +1597,15 @@ class ListRepetition (Repetition):
   def grammar_details(cls, depth=-1, visited=None):
     params = ""
     if cls.grammar_min == cls.grammar_max:
-      params += ", count={}".format(cls.grammar_min)
+      params += ", count={0}".format(cls.grammar_min)
     else:
       if cls.grammar_min != 1:
-        params += ", min={}".format(cls.grammar_min)
+        params += ", min={0}".format(cls.grammar_min)
       if cls.grammar_max != sys.maxsize:
-        params += ", max={}".format(cls.grammar_max)
+        params += ", max={0}".format(cls.grammar_max)
     if cls.grammar_collapse:
       params += ", collapse=True"
-    return "LIST_OF({}, sep={}{})".format(cls.grammar[0].grammar_details(depth, visited), cls.sep.grammar_details(depth, visited), params)
+    return "LIST_OF({0}, sep={1}{2})".format(cls.grammar[0].grammar_details(depth, visited), cls.sep.grammar_details(depth, visited), params)
 
   def grammar_postprocess(self, parent, sessiondata):
     # Collapse down the succ_grammar instances for successive matches
@@ -1651,8 +1654,8 @@ def ANY_EXCEPT(charlist, **kwargs):
 
   This is functionally equivalent to ``WORD("^"+charlist)``.
   """
-  kwargs.setdefault("grammar_name", "ANY_EXCEPT({!r})".format(charlist))
-  return WORD("^{}".format(charlist), **kwargs)
+  kwargs.setdefault("grammar_name", "ANY_EXCEPT({0!r})".format(charlist))
+  return WORD("^{0}".format(charlist), **kwargs)
 
 # FIXME: whitespace at beginning of line
 class BOL (Terminal):

@@ -155,4 +155,4 @@ def ebnf_specialseq(grammar, opts, name=None, details=None, desc=None):
     text = desc or getattr(grammar, 'grammar_desc', None)
     if not text:
       text = name or grammar.grammar_name
-  return '? {} ?'.format(text)
+  return '? {0} ?'.format(text)

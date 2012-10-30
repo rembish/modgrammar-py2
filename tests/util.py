@@ -140,25 +140,25 @@ class BasicGrammarTestCase (TestCase):
     p = self.grammar.parser()
     try:
       for teststr in self.matches:
-        msg = '[testcase={!r}]'.format(teststr)
+        msg = '[testcase={0!r}]'.format(teststr)
         o = p.parse_string(teststr)
         self.check_result(teststr, o, True, msg)
         self.assertEqual(p.remainder(), '', msg)
     except ParseError:
-      self.fail("Got unexpected ParseError {}".format(msg))
+      self.fail("Got unexpected ParseError {0}".format(msg))
 
   def test_matches_with_remainder(self):
     p = self.grammar.parser()
     try:
       for teststr in self.matches_with_remainder:
-        msg = '[testcase={!r}]'.format(teststr)
+        msg = '[testcase={0!r}]'.format(teststr)
         p.reset()
         o = p.parse_string(teststr)
         remainder = p.remainder()
         self.check_result(teststr[:-len(remainder)], o, None, msg)
         self.assertNotEqual(remainder, '', msg)
     except ParseError:
-      self.fail("Got unexpected ParseError {}".format(msg))
+      self.fail("Got unexpected ParseError {0}".format(msg))
 
   def test_matches_with_eof(self):
     # This uses the same testcases as test_matches_with_remainder, but cuts off
@@ -178,7 +178,7 @@ class BasicGrammarTestCase (TestCase):
           continue
         remainder = p.remainder()
         teststr = teststr[:-len(remainder)]
-        msg = '[testcase={!r}]'.format(teststr)
+        msg = '[testcase={0!r}]'.format(teststr)
         p.reset()
         o = p.parse_string(teststr, eof=True)
         remainder = p.remainder()
@@ -186,7 +186,7 @@ class BasicGrammarTestCase (TestCase):
         self.assertEqual(remainder, '', msg)
 	# Test this a second way, with the EOF being sent as an empty string
 	# after a partial-match, to make sure that works too.
-        msg = '[testcase={}, eof after partial]'.format(teststr)
+        msg = '[testcase={0}, eof after partial]'.format(teststr)
         p.reset()
         o = p.parse_string(teststr)
         if o is None:
@@ -206,18 +206,18 @@ class BasicGrammarTestCase (TestCase):
           if count is False:
             break
           elif count not in (0, len(teststr)):
-            self.fail("{!r} yielded count={!r} for {!r}+EOF".format(self.grammar, count, teststr))
+            self.fail("{!r} yielded count={!r} for {0!r}+EOF".format(self.grammar, count, teststr))
       # If we call parse_string with an empty buffer and eof=True, make sure it doesn't throw any exceptions
       p.reset()
       o = p.parse_string('', eof=True)
     except ParseError:
-      self.fail("Got unexpected ParseError {}".format(msg))
+      self.fail("Got unexpected ParseError {0}".format(msg))
 
   def test_matches_as_false(self):
     p = self.grammar.parser()
     try:
       for teststr in self.matches_as_false:
-        msg = '[testcase={!r}]'.format(teststr)
+        msg = '[testcase={0!r}]'.format(teststr)
         p.reset()
         o = p.parse_string(teststr)
         remlen = len(p.remainder())
@@ -225,20 +225,20 @@ class BasicGrammarTestCase (TestCase):
           teststr = teststr[:-remlen]
         self.check_result(teststr, o, False, msg)
     except ParseError:
-      self.fail("Got unexpected ParseError {}".format(msg))
+      self.fail("Got unexpected ParseError {0}".format(msg))
 
   def test_match_fail(self):
     p = self.grammar.parser()
     for teststr in self.fail_matches:
       p.reset()
-      msg = '[testcase={!r}]'.format(teststr)
+      msg = '[testcase={0!r}]'.format(teststr)
       with self.assertRaises(ParseError, msg=msg):
         p.parse_string(teststr)
 
   def test_partial(self):
     p = self.grammar.parser()
     for case in self.partials:
-      msg = '[testcase={!r}]'.format(case)
+      msg = '[testcase={0!r}]'.format(case)
       p.reset()
       prelim = case[:-1]
       final = case[-1]
@@ -246,12 +246,12 @@ class BasicGrammarTestCase (TestCase):
         try:
           o = p.parse_string(pstr)
         except ParseError:
-          self.fail("Got ParseError on {!r} of {!r}".format(pstr, case))
-        self.assertIsNone(o, "[{!r} of {!r}]".format(pstr, case))
+          self.fail("Got ParseError on {0!r} of {1!r}".format(pstr, case))
+        self.assertIsNone(o, "[{0!r} of {1!r}]".format(pstr, case))
       try:
         o = p.parse_string(final)
       except ParseError:
-        self.fail("Got ParseError on {!r} of {!r}".format(final, case))
+        self.fail("Got ParseError on {0!r} of {1!r}".format(final, case))
       remlen = len(p.remainder())
       teststr = ''.join(case)
       if remlen:
@@ -261,7 +261,7 @@ class BasicGrammarTestCase (TestCase):
   def test_partial_fail(self):
     p = self.grammar.parser()
     for case in self.fail_partials:
-      msg = '[testcase={!r}]'.format(case)
+      msg = '[testcase={0!r}]'.format(case)
       p.reset()
       prelim = case[:-1]
       final = case[-1]
@@ -269,8 +269,8 @@ class BasicGrammarTestCase (TestCase):
         try:
           o = p.parse_string(pstr)
         except ParseError:
-          self.fail("Got ParseError on {!r} of {!r}".format(pstr, case))
-        self.assertIsNone(o, "[{!r} of {!r}]".format(pstr, case))
+          self.fail("Got ParseError on {0!r} of {1!r}".format(pstr, case))
+        self.assertIsNone(o, "[{0!r} of {1!r}]".format(pstr, case))
       with self.assertRaises(ParseError, msg=msg):
         p.parse_string(final)
 
@@ -279,7 +279,7 @@ class BasicGrammarTestCase (TestCase):
       p = self.grammar.parser()
       if self.grammar.grammar_whitespace is True:
         for teststr in self.matches + self.matches_with_remainder:
-          msg = '[testcase={!r}]'.format(teststr)
+          msg = '[testcase={0!r}]'.format(teststr)
           p.reset()
           teststr = ' ' + teststr + ' '
           o = p.parse_string(teststr)
@@ -289,7 +289,7 @@ class BasicGrammarTestCase (TestCase):
       elif self.grammar.grammar_whitespace is False:
         for teststr in self.matches + self.matches_with_remainder:
           p.reset()
-          msg = '[testcase={!r}]'.format(teststr)
+          msg = '[testcase={0!r}]'.format(teststr)
           teststr = ' ' + teststr
           try:
             o = p.parse_string(teststr)
@@ -299,5 +299,5 @@ class BasicGrammarTestCase (TestCase):
             remainder = p.remainder()
             self.assertEqual(remainder, teststr, msg)
     except ParseError:
-      self.fail("Got unexpected ParseError {}".format(msg))
+      self.fail("Got unexpected ParseError {0}".format(msg))
 

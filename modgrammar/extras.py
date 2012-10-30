@@ -26,7 +26,7 @@ class REGrammar (Terminal):
       cls.boltest = False
     if "grammar_name" not in attrs:
       if cls.regexp is not None:
-        cls.grammar_name = "RE({!r})".format(cls.regexp.pattern)
+        cls.grammar_name = "RE({0!r})".format(cls.regexp.pattern)
       else:
         cls.grammar_name = None
 
@@ -61,7 +61,7 @@ class REGrammar (Terminal):
 
 class QuotedString (Terminal):
   grammar_desc = "quoted string"
-  quote_char = '"'
+  quote_char = "'"
   newline_ok = False
 
   @classmethod

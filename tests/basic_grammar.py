@@ -575,7 +575,7 @@ class TestEOF (util.BasicGrammarTestCase):
     p = self.grammar.parser()
     for teststr in ('a', ' '):
       p.reset()
-      msg = '[testcase={!r}]'.format(teststr)
+      msg = '[testcase={0!r}]'.format(teststr)
       with self.assertRaises(ParseError, msg=msg):
         p.parse_string(teststr, eof=True)
 
@@ -595,7 +595,7 @@ class TestEOF (util.BasicGrammarTestCase):
     p = g.parser()
     try:
       for teststr in ('', ' '):
-        msg = '[testcase={!r}]'.format(teststr)
+        msg = '[testcase={0!r}]'.format(teststr)
         o = p.parse_string(teststr, eof=True)
         self.assertIsNotNone(o)
         self.assertEqual(len(p.remainder()), 0)

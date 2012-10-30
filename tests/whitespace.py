@@ -320,10 +320,10 @@ class WhitespaceSettingTests (util.TestCase):
 
   def check_recursive(self, name, g, expected, expected_sub):
     if g.grammar_whitespace != expected:
-      raise self.failureException("When testing {}: grammar_whitespace for {!r} is {!r}".format(name, g, g.grammar_whitespace))
+      raise self.failureException("When testing {0}: grammar_whitespace for {1!r} is {2!r}".format(name, g, g.grammar_whitespace))
     if issubclass(g, ListRepetition):
       if g.grammar[1].grammar_whitespace != expected:
-        raise self.failureException("When testing {}: grammar_whitespace for {!r} is {!r}".format(name, g.grammar[1], g.grammar[1].grammar_whitespace))
+        raise self.failureException("When testing {0}: grammar_whitespace for {1!r} is {2!r}".format(name, g.grammar[1], g.grammar[1].grammar_whitespace))
       sub_list = [g.grammar[0], g.sep]
     else:
       sub_list = g.grammar
