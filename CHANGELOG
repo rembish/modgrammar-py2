@@ -1,3 +1,8 @@
+Version 0.8.1 2012-11-04 Aleksey Rembish <alex@rembish.ru>
+  * Fixed Py2 compatibility: __bool__ => __nonzero__
+  * Fixed Py2 compatibility: Reference resoulving through .pyc files
+  * Py2 version passes all test for now
+
 Version 0.8: 2011-12-22 Alex Stewart <alex@foogod.com>
   * Added NOT_FOLLOWED_BY grammar construct
   * Added grammar_error_override option
