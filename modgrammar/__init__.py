@@ -956,6 +956,7 @@ class Grammar (object):
 
   def __bool__(self):
     return bool(self.elements) or self.grammar_terminal
+  __nonzero__ = __bool__
 
   def __str__(self):
     return self.string
@@ -1488,6 +1489,7 @@ class Word (Terminal):
 
   def __bool__(self):
     return bool(self.string)
+  __nonzero__ = __bool__
 
 def REF(ref_name, module=DEFAULT, default=None):
   """

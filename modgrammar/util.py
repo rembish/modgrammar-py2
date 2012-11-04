@@ -99,17 +99,18 @@ def calc_line_col(string, count, line=0, col=0, tabs=1):
   return (line, col)
 
 def get_calling_module(stack=None):
+
   if stack is None:
     stack = traceback.extract_stack(None)
   for s in reversed(stack):
     filename = s[0]
     if filename == "<stdin>":
       return sys.modules["__main__"]
-    elif filename == __file__ or filename == modgrammar.__file__:
-      continue
+    elif __file__.startswith(filename) or modgrammar.__file__.startswith(filename):
+      continue # Bug with .pyc cache files fixed
     else:
       for m in sys.modules.values():
-        if getattr(m, "__file__", None) == filename:
+        if getattr(m, "__file__", '').startswith(filename):
           return m
   # For some reason, we weren't able to determine the module.  Not much we
   # can do here..
