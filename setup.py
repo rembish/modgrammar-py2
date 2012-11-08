@@ -3,12 +3,9 @@ try:
     from setuptools import setup, Command
 except ImportError:
     import distribute_setup
+
     distribute_setup.use_setuptools()
     from setuptools import setup, Command
-
-import os
-import sys
-from distutils import log
 
 from pkg_utils import *
 
@@ -18,8 +15,8 @@ setup(
     url='http://code.google.com/p/modgrammar',
     download_url='https://github.com/don-ramon/modgrammar-py2',
     license='BSD',
-    author='Alex Stewart',
-    author_email='alex@foogod.com',
+    author='Alex Stewart, Aleksey Rembish',
+    author_email='alex@foogod.com, alex@rembish.ru',
     description='Modular grammar-parsing engine (Python 2.6+ backport)',
     long_description=pkg_readme,
     zip_safe=True,
@@ -31,6 +28,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
         'Topic :: Text Processing',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],

@@ -1,5 +1,5 @@
-from .general_tests import GeneralRefTests
-from .basic_resolve_refs import ResolveRefTests
-from .norecurse_resolve_refs import ResolveRefTests as NorecurseResolveRefTests
-from .follow_resolve_refs import ResolveRefTests as FollowResolveRefTests
-from .follow_norecurse_resolve_refs import ResolveRefTests as FollowNoRecurseResolveRefTests
+from tests.ref_tests.general_tests import GeneralRefTests
+from tests.ref_tests.basic_resolve_refs import ResolveRefTests
+from tests.ref_tests.norecurse_resolve_refs import ResolveRefTests as NorecurseResolveRefTests
+from tests.ref_tests.follow_resolve_refs import ResolveRefTests as FollowResolveRefTests
+from tests.ref_tests.follow_norecurse_resolve_refs import ResolveRefTests as FollowNoRecurseResolveRefTests

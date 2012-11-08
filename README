@@ -1,8 +1,8 @@
 Modgrammar is a general-purpose library for constructing language parsers and
-interpreters using context-free grammar definitions in Python.  Language
+interpreters using context-free grammar definitions in Python. Language
 parsing rules (grammars) can be defined using standard Python syntax, and then
 used to parse and validate input strings or files into meaningful data
-structures.  Possible applications range from simple input validation, to
+structures. Possible applications range from simple input validation, to
 complex expression evaluation, to full-fledged programming language parsing for
 compilers or interpreters. 
 
@@ -20,4 +20,4 @@ Some features include:
 * Modular grammar design supports distributing grammars as python library
   modules, combining grammars from multiple sources into larger grammars, and
   even parameterized grammar definitions.
-
+* Python 2.6+, 3.x support
