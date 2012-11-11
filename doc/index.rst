@@ -15,7 +15,7 @@ Modgrammar Resources
 * Python Package Index: http://pypi.python.org/pypi/modgrammar-py2
 * Parent Project Home: http://code.google.com/p/modgrammar
 * Github Py2/Py3 Fork Home: https://github.com/don-ramon/modgrammar-py2
-* Documentation: http://code.google.com/p/modgrammar/wiki/Docs
+* Documentation: http://don-ramon.github.com/modgrammar-py2
 
 General Documentation
 =====================

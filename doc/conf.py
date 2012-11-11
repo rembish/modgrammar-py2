@@ -42,8 +42,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Modgrammar'
-copyright = '2011, Alex Stewart <alex@foogod.com>'
+project = 'Modgrammar Py2/Py3'
+copyright = '2012, Alex Stewart <alex@foogod.com>, Aleksey Rembish <alex@rembish.ru>'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -213,8 +213,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'modgrammar', 'Modgrammar Documentation',
-     ['Alex Stewart <alex@foogod.com>'], 1)
+    ('index', 'modgrammar', 'Modgrammar Py2/Py3 Documentation',
+     ['Alex Stewart <alex@foogod.com>', 'Aleksey Rembish <alex@rembish.ru>'], 1)
 ]
 
 # -- Hack to workaround bug in Py3 ---------------------------------------------
