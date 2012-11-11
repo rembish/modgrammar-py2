@@ -1,0 +1,813 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modgrammar – The Modular Grammar Engine &mdash; Modgrammar 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Modgrammar 0.9.0 documentation" href="index.html" />
+    <link rel="prev" title="Modgrammar Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Modgrammar Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Modgrammar 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-modgrammar">
+<span id="modgrammar-the-modular-grammar-engine"></span><h1><a class="reference internal" href="#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> &#8211; The Modular Grammar Engine<a class="headerlink" href="#module-modgrammar" title="Permalink to this headline">¶</a></h1>
+<p>This module provides a full-featured pure-python framework for building tokenizing LR language parsers and interpreters for context-free grammars.  (The <a class="reference internal" href="#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> parsing engine is implemented as a recursive-descent parser with backtracking, using an object-oriented grammar model.)</p>
+<p>The <a class="reference internal" href="#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> parser is designed such that language grammars can be defined in python modules using standard python syntax.  To create a new grammar, simply create a new class definition (or multiple class definitions) derived from the <a class="reference internal" href="#modgrammar.Grammar" title="modgrammar.Grammar"><tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt></a> base class, and set its <tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt> attribute to a list of sub-grammars to match.  (Such definitions can be combined together into full grammar trees.)  Several basic pre-defined grammar constructs are also available in this module which larger grammars can be built up from.</p>
+<p>Once a grammar is defined, the <a class="reference internal" href="#modgrammar.Grammar.parser" title="modgrammar.Grammar.parser"><tt class="xref py py-meth docutils literal"><span class="pre">parser()</span></tt></a> method can be called on the toplevel grammar class to obtain a <a class="reference internal" href="#modgrammar.GrammarParser" title="modgrammar.GrammarParser"><tt class="xref py py-class docutils literal"><span class="pre">GrammarParser</span></tt></a> object, which can be used to parse text against the defined grammar.</p>
+<div class="section" id="grammar-classes">
+<h2>Grammar Classes<a class="headerlink" href="#grammar-classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="modgrammar.Grammar">
+<em class="property">class </em><tt class="descclassname">modgrammar.</tt><tt class="descname">Grammar</tt><a class="headerlink" href="#modgrammar.Grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is not intended to be instantiated directly.  Instead, it is a base class to be used for defining your own custom grammars.</p>
+<p>Subclasses of <a class="reference internal" href="#modgrammar.Grammar" title="modgrammar.Grammar"><tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt></a> serve two purposes.  The first is to actually define the grammar used for parsing.  The second is to serve as a base type for result objects created as the result of parsing.</p>
+<p>To define a new grammar, you should create a new class definition, descended from <a class="reference internal" href="#modgrammar.Grammar" title="modgrammar.Grammar"><tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt></a>.  In this class definition, you can override several class attributes and class methods to customize the behavior of the grammar.</p>
+</dd></dl>
+
+<div class="section" id="class-attributes">
+<h3>Class Attributes<a class="headerlink" href="#class-attributes" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="attribute">
+<dt id="modgrammar.Grammar.grammar">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar</tt><a class="headerlink" href="#modgrammar.Grammar.grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of sub-grammars used to make up this grammar.  This attribute almost always needs to be specified when defining a new grammar class, and is the way in which full grammars can be built up from smaller grammar elements.  In order for this grammar to match an input text, it must completely match each of the sub-grammars listed in its <a class="reference internal" href="#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> attribute, in order.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_tags">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_tags</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of &#8220;tags&#8221; to be associated with match result objects produced by this grammar.  These tags can be used with the <a class="reference internal" href="#modgrammar.Grammar.find_tag" title="modgrammar.Grammar.find_tag"><tt class="xref py py-meth docutils literal"><span class="pre">find_tag()</span></tt></a> and <a class="reference internal" href="#modgrammar.Grammar.find_tag_all" title="modgrammar.Grammar.find_tag_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_tag_all()</span></tt></a> methods to extract specific elements from a parse tree after a successful match.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_collapse">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_collapse</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_collapse" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>, indicates that this grammar element should be &#8220;collapsed&#8221; when constructing the final parse tree.  Any place in the parse tree where an instance of this grammar would normally occur will instead be replaced by the list of its sub-elements.  This can be used to make result parse trees simpler in cases where a grammar element has been defined for convenience of the grammar definition, but does not provide a lot of useful information in the resulting parse tree.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_name">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_name</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string used to identify this grammar.  This is used in a variety of places, including <tt class="xref py py-func docutils literal"><span class="pre">repr()</span></tt>, <tt class="xref py py-func docutils literal"><span class="pre">str()</span></tt>, <a class="reference internal" href="#modgrammar.generate_ebnf" title="modgrammar.generate_ebnf"><tt class="xref py py-func docutils literal"><span class="pre">generate_ebnf()</span></tt></a>, etc.  (Defaults to the name of the grammar class.)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_desc">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_desc</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptive string for the grammar to be used in <a class="reference internal" href="#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a> error messages. (Defaults to the same value as <a class="reference internal" href="#modgrammar.Grammar.grammar_name" title="modgrammar.Grammar.grammar_name"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_name</span></tt></a>.)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_error_override">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_error_override</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_error_override" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set, this grammar will report all match failures by its subgrammars as if it had failed itself.  This effectively &#8220;hides&#8221; the subgrammars in any <a class="reference internal" href="#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a> (which will use this grammar&#8217;s location and <a class="reference internal" href="#modgrammar.Grammar.grammar_desc" title="modgrammar.Grammar.grammar_desc"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_desc</span></tt></a> instead when constructing error messages, etc).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_whitespace">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_whitespace</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_whitespace" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt> (the default), this grammar will automatically skip over any whitespace found between its sub-grammars (it will be &#8220;whitespace consuming&#8221;).  If set to <tt class="xref py py-const docutils literal"><span class="pre">False</span></tt>, whitespace between elements will not be treated specially.</p>
+<p>In the case where you want a grammar to be &#8220;whitespace consuming&#8221; but want something other than the normal definition of &#8220;whitespace&#8221;, you can also set <a class="reference internal" href="#modgrammar.Grammar.grammar_whitespace" title="modgrammar.Grammar.grammar_whitespace"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_whitespace</span></tt></a> to a custom regular expression object to be used instead.  This regular expression should attempt to match as much whitespace as possible, starting at the specified position in the string (the actual match result is not used, except that its length is used to determine how far to skip ahead in the string).</p>
+<p>Note: In general, you will want to set this universally for your whole grammar.  The best way to do this is to define a <tt class="docutils literal"><span class="pre">grammar_whitespace</span></tt> module-level variable in the same module as your grammar classes are defined.  If this is present, it will be used as the default for all grammar classes in that module.</p>
+</dd></dl>
+
+<p>There are also a few less-commonly-used class attributes which may be useful when inspecting grammars, or may be overridden in special cases:</p>
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_terminal">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_terminal</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether this grammar is considered to be a &#8220;terminal&#8221; for the purposes of <a class="reference internal" href="#modgrammar.Grammar.terminals" title="modgrammar.Grammar.terminals"><tt class="xref py py-meth docutils literal"><span class="pre">terminals()</span></tt></a>, <a class="reference internal" href="#modgrammar.Grammar.tokens" title="modgrammar.Grammar.tokens"><tt class="xref py py-meth docutils literal"><span class="pre">tokens()</span></tt></a>, and <a class="reference internal" href="#modgrammar.generate_ebnf" title="modgrammar.generate_ebnf"><tt class="xref py py-func docutils literal"><span class="pre">generate_ebnf()</span></tt></a>.  By default, any grammar which contains no sub-grammars (an empty <a class="reference internal" href="#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> attribute) is considered to be a terminal, and any grammar which has sub-grammars is not.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_greedy">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_greedy</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_greedy" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt> (default), indicates that in cases where this grammar could match multiple instances of a sub-text (i.e. for grammars that match repetitions), it should attempt to match the longest possible string first.  By contrast, if set to <tt class="xref py py-const docutils literal"><span class="pre">False</span></tt>, the grammar will attempt to match the shortest repetition first.</p>
+<p>Note: This attribute does not have any affect on most custom grammars (because most custom grammars are not themselves repetition grammars (instances of <tt class="xref py py-class docutils literal"><span class="pre">Repetition</span></tt>)).  If you are looking to change this behavior in your own grammar definitions, you likely want to use the <em>collapse</em> parameter of <tt class="xref py py-func docutils literal"><span class="pre">REPETITON()</span></tt> (and related functions) instead.  Changing this attribute is mainly useful if for some reason you want to make a custom subclass of <tt class="xref py py-class docutils literal"><span class="pre">Repetition</span></tt>, or if you are making a custom grammar element (with a custom <a class="reference internal" href="#modgrammar.Grammar.grammar_parse" title="modgrammar.Grammar.grammar_parse"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_parse()</span></tt></a> definition) for which this setting might be significant.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.grammar_collapse_skip">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_collapse_skip</tt><a class="headerlink" href="#modgrammar.Grammar.grammar_collapse_skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies that, if an enclosing grammar is set to collapse, and this grammar is in its sub-grammar list, instances of this sub-grammar should also be left out of the resulting parse tree.</p>
+<p>Note: There is usually no reason to set this attribute.  (It is enabled by default for <a class="reference internal" href="#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a> grammars, as it is often desirable to leave literal matches out when collapsing grammars since they usually provide no information which isn&#8217;t already known to the grammar designer.)</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="overridable-class-methods">
+<h3>Overridable Class Methods<a class="headerlink" href="#overridable-class-methods" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>The following methods may be overridden in subclasses to change the default behavior of a grammar class:</p>
+<dl class="classmethod">
+<dt id="modgrammar.Grammar.grammar_details">
+<em class="property">classmethod </em><tt class="descclassname">Grammar.</tt><tt class="descname">grammar_details</tt><big>(</big><em>depth=-1</em>, <em>visited=None</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.grammar_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string containing a description of the contents of this grammar definition (such as used by <tt class="xref py py-func docutils literal"><span class="pre">repr()</span></tt>).</p>
+<p><em>depth</em> specifies a recursion depth to use when constructing the string description.  If <em>depth</em> is nonzero, this method will recursively call <a class="reference internal" href="#modgrammar.Grammar.grammar_details" title="modgrammar.Grammar.grammar_details"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_details()</span></tt></a> for each of its sub-grammars in turn to construct the final description.  If <em>depth</em> is zero, this method will just return this grammar&#8217;s name (<a class="reference internal" href="#modgrammar.Grammar.grammar_name" title="modgrammar.Grammar.grammar_name"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_name</span></tt></a>).  If <em>depth</em> is negative, recursion depth is not limited.</p>
+<p><em>visited</em> is used for detecting circular references during recursion.  It can contain a tuple of grammars which have already been seen and should not be descended into again.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="modgrammar.Grammar.grammar_ebnf_lhs">
+<em class="property">classmethod </em><tt class="descclassname">Grammar.</tt><tt class="descname">grammar_ebnf_lhs</tt><big>(</big><em>opts</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.grammar_ebnf_lhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the string to be used for this grammar when it occurs in the left-hand-side (LHS) of an EBNF definition.  This can be overridden to customize how this grammar is represented by <a class="reference internal" href="#modgrammar.generate_ebnf" title="modgrammar.generate_ebnf"><tt class="xref py py-func docutils literal"><span class="pre">generate_ebnf()</span></tt></a>.</p>
+<p>Returns a tuple <em>(string, grammars)</em>, where <em>string</em> is the EBNF LHS string to use, and <em>grammars</em> is a list of other grammars on which this one depends (i.e. grammars whose names are referenced in <em>string</em>).</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="modgrammar.Grammar.grammar_ebnf_rhs">
+<em class="property">classmethod </em><tt class="descclassname">Grammar.</tt><tt class="descname">grammar_ebnf_rhs</tt><big>(</big><em>opts</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.grammar_ebnf_rhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the string to be used to describe this grammar when it occurs in the right-hand-side (RHS) of an EBNF definition.  This can be overridden to customize how this grammar is represented by <a class="reference internal" href="#modgrammar.generate_ebnf" title="modgrammar.generate_ebnf"><tt class="xref py py-func docutils literal"><span class="pre">generate_ebnf()</span></tt></a>.</p>
+<p>Returns a tuple <em>(string, grammars)</em>, where <em>string</em> is the EBNF RHS string to use, and <em>grammars</em> is a list of other grammars on which this one depends (i.e. grammars whose names are referenced in <em>string</em>).</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="modgrammar.Grammar.grammar_parse">
+<em class="property">classmethod </em><tt class="descclassname">Grammar.</tt><tt class="descname">grammar_parse</tt><big>(</big><em>text</em>, <em>index</em>, <em>sessiondata</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.grammar_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called by the <a class="reference internal" href="#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> parser system to actually attempt to match this grammar against a piece of text.  This method is not intended to be called directly by an application (use the <a class="reference internal" href="#modgrammar.Grammar.parser" title="modgrammar.Grammar.parser"><tt class="xref py py-meth docutils literal"><span class="pre">parser()</span></tt></a> method to obtain a <a class="reference internal" href="#modgrammar.GrammarParser" title="modgrammar.GrammarParser"><tt class="xref py py-class docutils literal"><span class="pre">GrammarParser</span></tt></a> object and use that).  In advanced cases, this method can be overridden to provide custom parsing behaviors for a particular grammar type.</p>
+<p>NOTE: Overriding this method is very complicated and currently beyond the scope of this documentation.  This is not recommended for anyone who does not understand the <a class="reference internal" href="#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> parser design very well.  (Someday, with luck, there will be some more documentation written on this advanced topic.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.grammar_collapsed_elems">
+<tt class="descclassname">Grammar.</tt><tt class="descname">grammar_collapsed_elems</tt><big>(</big><em>sessiondata</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.grammar_collapsed_elems" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Note: This is an instance method, not a classmethod</em></p>
+<p>Return the list of elements to be used in place of this one when collapsing (this is only used if <a class="reference internal" href="#modgrammar.Grammar.grammar_collapse" title="modgrammar.Grammar.grammar_collapse"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_collapse</span></tt></a> is <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>).</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="useful-class-methods">
+<h3>Useful Class Methods<a class="headerlink" href="#useful-class-methods" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>The following methods are intended to be called on grammar classes by the application:</p>
+<dl class="classmethod">
+<dt id="modgrammar.Grammar.parser">
+<em class="property">classmethod </em><tt class="descclassname">Grammar.</tt><tt class="descname">parser</tt><big>(</big><em>sessiondata=None</em>, <em>tabs=1</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#modgrammar.GrammarParser" title="modgrammar.GrammarParser"><tt class="xref py py-class docutils literal"><span class="pre">GrammarParser</span></tt></a> associated with this grammar.</p>
+<p>If provided, <em>sessiondata</em> can contain data which should be provided to the <a class="reference internal" href="#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> method of each result object created during parsing.</p>
+<p>The <em>tabs</em> parameter indicates the width of &#8220;tab stops&#8221; in the input (i.e. how far a &#8220;tab&#8221; character will advance the column position when encountered).  This is only used to correctly report column numbers in <a class="reference internal" href="#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a>s.  If you don&#8217;t care about that, or your input does not contain tabs, you can ignore this parameter.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="modgrammar.Grammar.grammar_resolve_refs">
+<em class="property">classmethod </em><tt class="descclassname">Grammar.</tt><tt class="descname">grammar_resolve_refs</tt><big>(</big><em>refmap={}</em>, <em>recurse=True</em>, <em>follow=False</em>, <em>missing_ok=False</em>, <em>skip=None</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.grammar_resolve_refs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve any <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> declarations within the grammar and replace them with the actual sub-grammars they refer to.  The following optional arguments can be provided:</p>
+<dl class="docutils">
+<dt><em>refmap</em></dt>
+<dd>If provided, contains a dictionary of reference-name to grammar mappings to use.  If a reference&#8217;s name is found in this dictionary, the dictionary value will be used to replace it, instead of using the standard name-lookup procedure.</dd>
+<dt><em>recurse</em></dt>
+<dd>If set to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>, will perform a recursive search into each of this grammar&#8217;s sub-grammars, calling <a class="reference internal" href="#modgrammar.Grammar.grammar_resolve_refs" title="modgrammar.Grammar.grammar_resolve_refs"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_resolve_refs()</span></tt></a> on each with the same parameters.</dd>
+<dt><em>follow</em></dt>
+<dd>If set to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt> (and <em>recurse</em> is also <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>), will also call <a class="reference internal" href="#modgrammar.Grammar.grammar_resolve_refs" title="modgrammar.Grammar.grammar_resolve_refs"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_resolve_refs()</span></tt></a> on the result of each <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> after it is resolved.</dd>
+<dt><em>missing_ok</em></dt>
+<dd>If <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>, it is not considered an error if a <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> construct cannot be resolved at this time (it will simply be left as a <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> in the resulting grammar).  If <tt class="xref py py-const docutils literal"><span class="pre">False</span></tt>, then all references must be resolvable or an <tt class="xref py py-exc docutils literal"><span class="pre">UnresolvedReference</span></tt> exception will be raised.</dd>
+<dt><em>skip</em></dt>
+<dd>An optional list of grammars which should not be searched for <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> constructs (useful in conjunction with <em>recurse</em> to exclude certain parts of the grammar).</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="result-objects">
+<h2>Result Objects<a class="headerlink" href="#result-objects" title="Permalink to this headline">¶</a></h2>
+<p>As match result objects are actually instances of the grammar class which produced the match, it is also possible, when defining a new grammar class, to override or add new instance methods which will affect the behavior of any associated result objects.  Result objects also posess a number of attributes and methods which can be useful when examining parse results.</p>
+<div class="section" id="overridable-instance-methods">
+<h3>Overridable Instance Methods<a class="headerlink" href="#overridable-instance-methods" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="method">
+<dt id="modgrammar.Grammar.elem_init">
+<tt class="descclassname">Grammar.</tt><tt class="descname">elem_init</tt><big>(</big><em>sessiondata</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.elem_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called on each result object after it is fully initialized, before the resulting parse tree is returned to the caller.  It can be overridden to perform any custom initialization desired (the default implementation does nothing).</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="useful-instance-attributes">
+<h3>Useful Instance Attributes<a class="headerlink" href="#useful-instance-attributes" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="attribute">
+<dt id="modgrammar.Grammar.string">
+<tt class="descclassname">Grammar.</tt><tt class="descname">string</tt><a class="headerlink" href="#modgrammar.Grammar.string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains the portion of the text string which this match corresponds to.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.Grammar.elements">
+<tt class="descclassname">Grammar.</tt><tt class="descname">elements</tt><a class="headerlink" href="#modgrammar.Grammar.elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains result objects for each of the sub-grammars that make up this grammar match.  There is typically one entry in <a class="reference internal" href="#modgrammar.Grammar.elements" title="modgrammar.Grammar.elements"><tt class="xref py py-attr docutils literal"><span class="pre">elements</span></tt></a> for each entry in <a class="reference internal" href="#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> (though there may not be a direct correspondence if things like <a class="reference internal" href="#modgrammar.Grammar.grammar_collapse" title="modgrammar.Grammar.grammar_collapse"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_collapse</span></tt></a> are used)</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="useful-instance-methods">
+<h3>Useful Instance Methods<a class="headerlink" href="#useful-instance-methods" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="method">
+<dt id="modgrammar.Grammar.get">
+<tt class="descclassname">Grammar.</tt><tt class="descname">get</tt><big>(</big><em>*type_path</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first immediate sub-element of the given type (or by descending through multiple types, in the same way as <a class="reference internal" href="#modgrammar.Grammar.get_all" title="modgrammar.Grammar.get_all"><tt class="xref py py-meth docutils literal"><span class="pre">get_all()</span></tt></a>).</p>
+<p>This is equivalent to <tt class="docutils literal"><span class="pre">.get_all(*type_path)[0]</span></tt> except that it is more efficient, and will return <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> if there are no such objects (instead of raising <tt class="xref py py-exc docutils literal"><span class="pre">IndexError</span></tt>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.get_all">
+<tt class="descclassname">Grammar.</tt><tt class="descname">get_all</tt><big>(</big><em>*type_path</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.get_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all immediate sub-elements of the given type.</p>
+<p>If more than one type parameter is provided, it will treat the types as a &#8220;path&#8221; to traverse: for all sub-elements matching the first type, retrieve all sub-elements of those matching the second type, and so on, until it reaches the last type in the list.  (It will thus return all elements of the parse tree which are of the final type, which can be reached by traversing the previous types in order.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.find">
+<tt class="descclassname">Grammar.</tt><tt class="descname">find</tt><big>(</big><em>*type_path</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first element anywhere in the parse tree matching the given type (or by descending through multiple types, in the same way as <a class="reference internal" href="#modgrammar.Grammar.find_all" title="modgrammar.Grammar.find_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_all()</span></tt></a>).</p>
+<p>This is equivalent to <tt class="docutils literal"><span class="pre">.find_all(*type_path)[0]</span></tt> except that it is more efficient, and will return <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> if there are no such objects (instead of raising <tt class="xref py py-exc docutils literal"><span class="pre">IndexError</span></tt>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.find_all">
+<tt class="descclassname">Grammar.</tt><tt class="descname">find_all</tt><big>(</big><em>*type_path</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.find_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all elements anywhere in the parse tree matching the given type.</p>
+<p>Similar to <a class="reference internal" href="#modgrammar.Grammar.get_all" title="modgrammar.Grammar.get_all"><tt class="xref py py-meth docutils literal"><span class="pre">get_all()</span></tt></a>, if more than one type parameter is provided, it will treat the types as a &#8220;path&#8221; to traverse in order.  The difference from <a class="reference internal" href="#modgrammar.Grammar.get_all" title="modgrammar.Grammar.get_all"><tt class="xref py py-meth docutils literal"><span class="pre">get_all()</span></tt></a> is that, for each step in the path, the elements found do not have to be direct sub-elements, but can be anywhere in the sub-tree.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.find_tag">
+<tt class="descclassname">Grammar.</tt><tt class="descname">find_tag</tt><big>(</big><em>*tag_path</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.find_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first element anywhere in the parse tree with the given tag (or by descending through multiple tags, in the same way as <a class="reference internal" href="#modgrammar.Grammar.find_tag_all" title="modgrammar.Grammar.find_tag_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_tag_all()</span></tt></a>).</p>
+<p>This is equivalent to <tt class="docutils literal"><span class="pre">.find_tag_all(*tag_path)[0]</span></tt> except that it is more efficient, and will return <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> if there are no such objects (instead of raising <tt class="xref py py-exc docutils literal"><span class="pre">IndexError</span></tt>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.find_tag_all">
+<tt class="descclassname">Grammar.</tt><tt class="descname">find_tag_all</tt><big>(</big><em>*tag_path</em><big>)</big><a class="headerlink" href="#modgrammar.Grammar.find_tag_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all elements anywhere in the parse tree with the given tag.</p>
+<p>This functions identically to <a class="reference internal" href="#modgrammar.Grammar.find_all" title="modgrammar.Grammar.find_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_all()</span></tt></a>, except that the criteria for matching is based on tags, rather than object types.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.terminals">
+<tt class="descclassname">Grammar.</tt><tt class="descname">terminals</tt><big>(</big><big>)</big><a class="headerlink" href="#modgrammar.Grammar.terminals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an ordered list of all result objects in the parse tree which are terminals (that is, where <a class="reference internal" href="#modgrammar.Grammar.grammar_terminal" title="modgrammar.Grammar.grammar_terminal"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_terminal</span></tt></a> is <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.Grammar.tokens">
+<tt class="descclassname">Grammar.</tt><tt class="descname">tokens</tt><big>(</big><big>)</big><a class="headerlink" href="#modgrammar.Grammar.tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the parsed string, broken down into its smallest grammatical components.  (Another way of looking at this is that it returns the string values of all of the <a class="reference internal" href="#modgrammar.Grammar.terminals" title="modgrammar.Grammar.terminals"><tt class="xref py py-meth docutils literal"><span class="pre">terminals()</span></tt></a>.)</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="parser-objects">
+<h2>Parser Objects<a class="headerlink" href="#parser-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="modgrammar.GrammarParser">
+<em class="property">class </em><tt class="descclassname">modgrammar.</tt><tt class="descname">GrammarParser</tt><a class="headerlink" href="#modgrammar.GrammarParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parser objects are the way in which an application can actually make use of a grammar definition.  They provide the core interface to take input texts and attempt to match them against an associated grammar definition.</p>
+<p><a class="reference internal" href="#modgrammar.GrammarParser" title="modgrammar.GrammarParser"><tt class="xref py py-class docutils literal"><span class="pre">GrammarParser</span></tt></a> objects are not generally instantiated directly.  Instead, to obtain one, call the <a class="reference internal" href="#modgrammar.Grammar.parser" title="modgrammar.Grammar.parser"><tt class="xref py py-meth docutils literal"><span class="pre">parser()</span></tt></a> method on the appropriate grammar class.</p>
+<p>Parser objects have the following useful attributes:</p>
+<dl class="attribute">
+<dt id="modgrammar.GrammarParser.char">
+<tt class="descname">char</tt><a class="headerlink" href="#modgrammar.GrammarParser.char" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of characters we&#8217;ve successfully parsed since the beginning of parsing (or the last <a class="reference internal" href="#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.GrammarParser.line">
+<tt class="descname">line</tt><a class="headerlink" href="#modgrammar.GrammarParser.line" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of lines we&#8217;ve successfully parsed since the beginning of parsing (or the last <a class="reference internal" href="#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a>).  This is measured based on the number of line-end sequences we&#8217;ve seen thus far.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.GrammarParser.col">
+<tt class="descname">col</tt><a class="headerlink" href="#modgrammar.GrammarParser.col" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position of the current <a class="reference internal" href="#modgrammar.GrammarParser.line" title="modgrammar.GrammarParser.line"><tt class="xref py py-attr docutils literal"><span class="pre">line</span></tt></a> we&#8217;re at.</p>
+</dd></dl>
+
+<p>Methods:</p>
+<dl class="method">
+<dt id="modgrammar.GrammarParser.parse_string">
+<tt class="descname">parse_string</tt><big>(</big><em>string</em>, <em>bol=None</em>, <em>eof=None</em>, <em>reset=False</em>, <em>multi=False</em>, <em>data=None</em>, <em>matchtype='first'</em><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.parse_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to match <em>string</em> against the associated grammar.  If successful, returns a corresponding match object.  If there is an incomplete match (or it is impossible to determine yet whether the match is complete or not), save the current text in the match buffer and return <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> to indicate more text is required.  If the text does not match any valid grammar construction, raise <a class="reference internal" href="#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a>.</p>
+<dl class="docutils">
+<dt>Optional parameters:</dt>
+<dd><dl class="first last docutils">
+<dt><em>reset</em></dt>
+<dd>Call <a class="reference internal" href="#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a> before starting to parse the supplied text.</dd>
+<dt><em>multi</em></dt>
+<dd>Instead of returning a single match result, keep matching as many times as possible before returning, and return a list of matches, in sequence.</dd>
+<dt><em>eof</em></dt>
+<dd>Indicates that no more text will be coming, and the parser should return the best match it can with the supplied text instead of asking for more.  (If <em>eof</em> is set, the parser will never return a <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> result, unless the buffer is completely empty.)</dd>
+<dt><em>data</em></dt>
+<dd>Use the provided data instead of the default <em>sessiondata</em> during this parse run.</dd>
+<dt><em>matchtype</em></dt>
+<dd><dl class="first last docutils">
+<dt>If a grammar could match multiple ways, determine how the best match is chosen:</dt>
+<dd><dl class="first last docutils">
+<dt>&#8220;first&#8221; (default)</dt>
+<dd>The first successful match the grammar comes up with (as determined by normal grammar test ordering).</dd>
+<dt>&#8220;last&#8221;</dt>
+<dd>The last successful match.</dd>
+<dt>&#8220;longest&#8221;</dt>
+<dd>The match which uses up the longest portion of the input text.</dd>
+<dt>&#8220;shortest&#8221;</dt>
+<dd>The match which uses up the shortest portion of the input text.</dd>
+<dt>&#8220;all&#8221;</dt>
+<dd>Return all possible matches, in a list.  Note that in this case the buffer position will not be automatically advanced.  You must call <a class="reference internal" href="#modgrammar.GrammarParser.skip" title="modgrammar.GrammarParser.skip"><tt class="xref py py-func docutils literal"><span class="pre">skip()</span></tt></a> manually.</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>bol</em></dt>
+<dd>Treat the input text as starting at the beginning of a line (for the purposes of matching the <a class="reference internal" href="#modgrammar.BOL" title="modgrammar.BOL"><tt class="xref py py-const docutils literal"><span class="pre">BOL</span></tt></a> grammar element).  It is not usually necessary to specify this explicitly.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.GrammarParser.parse_lines">
+<tt class="descname">parse_lines</tt><big>(</big><em>lines</em>, <em>bol=False</em>, <em>eof=False</em>, <em>reset=False</em>, <em>data=None</em>, <em>matchtype='first'</em><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.parse_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>(generator method)</em></p>
+<p>Attempt to match a list (or actually any iterable) of strings against the associated grammar.  This is effectively the same as calling <a class="reference internal" href="#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> repeatedly for each string in the list to obtain all matches in sequence.</p>
+<p>Return values, exceptions, and optional parameters are all exactly the same as for <a class="reference internal" href="#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a>.</p>
+<p>Note: Be careful using <tt class="docutils literal"><span class="pre">matchtype=&quot;all&quot;</span></tt> with parse_lines/parse_file.  You must manually call <a class="reference internal" href="#modgrammar.GrammarParser.skip" title="modgrammar.GrammarParser.skip"><tt class="xref py py-func docutils literal"><span class="pre">skip()</span></tt></a> after each yielded match, or you will end up with an infinite loop!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.GrammarParser.parse_file">
+<tt class="descname">parse_file</tt><big>(</big><em>file</em>, <em>bol=False</em>, <em>eof=True</em>, <em>reset=False</em>, <em>data=None</em>, <em>matchtype='first'</em><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>(generator method)</em></p>
+<p>Open and process the contents of a file using the associated grammar.  This is basically the same as opening the specified file, and passing the resulting file object to <a class="reference internal" href="#modgrammar.GrammarParser.parse_lines" title="modgrammar.GrammarParser.parse_lines"><tt class="xref py py-meth docutils literal"><span class="pre">parse_lines()</span></tt></a>.</p>
+<p>Return values, exceptions, and optional parameters are all exactly the same as for <a class="reference internal" href="#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a>.</p>
+<p>Note: Be careful using <tt class="docutils literal"><span class="pre">matchtype=&quot;all&quot;</span></tt> with parse_lines/parse_file.  You must manually call <a class="reference internal" href="#modgrammar.GrammarParser.skip" title="modgrammar.GrammarParser.skip"><tt class="xref py py-func docutils literal"><span class="pre">skip()</span></tt></a> after each yielded match, or you will end up with an infinite loop!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.GrammarParser.remainder">
+<tt class="descname">remainder</tt><big>(</big><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.remainder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the remaining contents of the parse buffer.  After parsing, this will contain whatever portion of the original text was not used by the parser up to this point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.GrammarParser.clear_remainder">
+<tt class="descname">clear_remainder</tt><big>(</big><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.clear_remainder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear any un-matched text left in the buffer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.GrammarParser.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset this parser back to its initial state.</p>
+<p>This will clear any remainder in the buffer and reset all (line, column, etc) counters to zero.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modgrammar.GrammarParser.skip">
+<tt class="descname">skip</tt><big>(</big><em>count</em><big>)</big><a class="headerlink" href="#modgrammar.GrammarParser.skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip forward the specified number of characters in the input buffer (discarding the text skipped over).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="built-in-grammars">
+<h2>Built-In Grammars<a class="headerlink" href="#built-in-grammars" title="Permalink to this headline">¶</a></h2>
+<p>The following basic grammar classes/factories are provided from which more complicated grammars can be constructed.  For those that take arguments, in addition to the arguments listed, there are a number of standard keyword arguments which can also be provided to alter the default behaviors:</p>
+<ul>
+<li><p class="first">For any grammars which involve repetition, the <em>min</em> and <em>max</em> parameters can be used to change the minimum and maximum number of repetitions which are allowed.  <em>count</em> can also be used to set <em>min</em> and <em>max</em> to the same value.</p>
+</li>
+<li><p class="first">There are also several standard keyword parameters which correspond to the standard class attributes for the Grammar class.  Setting these keyword arguments will have the same effect as if the corresponding class attribute had been specified in a class definition:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><p class="first last">Keyword</p>
+</th>
+<th class="head"><p class="first last">Class Attribute</p>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><p class="first last"><em>collapse</em></p>
+</td>
+<td><p class="first last"><a class="reference internal" href="#modgrammar.Grammar.grammar_collapse" title="modgrammar.Grammar.grammar_collapse"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_collapse</span></tt></a></p>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="first last"><em>collapse_skip</em></p>
+</td>
+<td><p class="first last"><a class="reference internal" href="#modgrammar.Grammar.grammar_collapse_skip" title="modgrammar.Grammar.grammar_collapse_skip"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_collapse_skip</span></tt></a></p>
+</td>
+</tr>
+<tr class="row-even"><td><p class="first last"><em>greedy</em></p>
+</td>
+<td><p class="first last"><a class="reference internal" href="#modgrammar.Grammar.grammar_greedy" title="modgrammar.Grammar.grammar_greedy"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_greedy</span></tt></a></p>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="first last"><em>tags</em></p>
+</td>
+<td><p class="first last"><a class="reference internal" href="#modgrammar.Grammar.grammar_tags" title="modgrammar.Grammar.grammar_tags"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_tags</span></tt></a></p>
+</td>
+</tr>
+<tr class="row-even"><td><p class="first last"><em>whitespace</em></p>
+</td>
+<td><p class="first last"><a class="reference internal" href="#modgrammar.Grammar.grammar_whitespace" title="modgrammar.Grammar.grammar_whitespace"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_whitespace</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</li>
+</ul>
+<dl class="function">
+<dt id="modgrammar.GRAMMAR">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">GRAMMAR</tt><big>(</big><em>*subgrammars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.GRAMMAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows the construction of &#8220;anonymous grammars&#8221;, that is, creating a grammar without explicitly defining a named class derived from the <a class="reference internal" href="#modgrammar.Grammar" title="modgrammar.Grammar"><tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt></a> superclass.  This can be useful for some simple grammars where a full class definition is not necessary.</p>
+<p><em>subgrammars</em> is a list of other grammars which the new grammar should be made up of, the same as would be given as the <a class="reference internal" href="#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> attribute in a grammar class definition.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.G">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">G</tt><big>(</big><em>*subgrammars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.G" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a synonym for <a class="reference internal" href="#modgrammar.GRAMMAR" title="modgrammar.GRAMMAR"><tt class="xref py py-func docutils literal"><span class="pre">GRAMMAR()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.LITERAL">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">LITERAL</tt><big>(</big><em>string</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.LITERAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a simple grammar that only matches the specified literal string.  Literal matches are case-sensitive.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.L">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">L</tt><big>(</big><em>string</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.L" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a synonym for <a class="reference internal" href="#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.WORD">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">WORD</tt><big>(</big><em>startchars</em>, <em>restchars=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.WORD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match any text consisting of a sequence of the specified characters.  If <em>restchars</em> is not provided, all characters in the sequence must be in the set specified by <em>startchars</em>.  If <em>restchars</em> is provided, then <em>startchars</em> specifies the valid options for the first character of the sequence, and <em>restchars</em> specifies the valid options for all following characters.</p>
+<p><em>startchars</em> and <em>restchars</em> are each strings containing a sequence of individual characters, or character ranges, in the same format used by python regular expressions for character-range (<tt class="docutils literal"><span class="pre">[]</span></tt>) operations (i.e. <tt class="docutils literal"><span class="pre">&quot;0123456789&quot;</span></tt> or <tt class="docutils literal"><span class="pre">&quot;A-Za-z&quot;</span></tt>).  If the first character of <em>startchars</em> or <em>restchars</em> is <tt class="docutils literal"><span class="pre">^</span></tt>, the meaning is also inverted, just as in regular expressions, so <tt class="docutils literal"><span class="pre">&quot;^A-Z&quot;</span></tt> would match anything <em>except</em> an upper-case ascii alphabet character.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.ANY_EXCEPT">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">ANY_EXCEPT</tt><big>(</big><em>charlist</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.ANY_EXCEPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match a string of any characters except those listed in <em>charlist</em>.</p>
+<p>This is functionally equivalent to <tt class="docutils literal"><span class="pre">WORD(&quot;^&quot;+charlist)</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.OR">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">OR</tt><big>(</big><em>*grammars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.OR" title="Permalink to this definition">¶</a></dt>
+<dd><p>An either-or grammar that will successfully match if any of its subgrammars matches.  <a class="reference internal" href="#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> grammars can also be created by combining other grammars in python expressions using the or operator (<tt class="docutils literal"><span class="pre">|</span></tt>).</p>
+<p>Note: Each of the possible grammars are attempted in left-to-right order.  This means that if more than one of the listed grammars could potentially match, the leftmost one will always match first.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.EXCEPT">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">EXCEPT</tt><big>(</big><em>grammar</em>, <em>exc_grammar</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.EXCEPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match <em>grammar</em>, but only if it does not also match <em>exception_grammar</em>.  (This is equivalent to the <tt class="docutils literal"><span class="pre">-</span></tt> (exception) operator in EBNF) <a class="reference internal" href="#modgrammar.EXCEPT" title="modgrammar.EXCEPT"><tt class="xref py py-func docutils literal"><span class="pre">EXCEPT()</span></tt></a> grammars can also be created by combining other grammars in python expressions using the except operator (<tt class="docutils literal"><span class="pre">-</span></tt>).</p>
+<p>Note: In many cases there are more efficient ways to design a particular grammar than using this construct.  It is provided mostly for full EBNF compatibility.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.REPEAT">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">REPEAT</tt><big>(</big><em>*grammar</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.REPEAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match (by default) one-or-more repetitions of <em>grammar</em>, one right after another.  If the <em>min</em> or <em>max</em> keyword parameters are provided, the number of matches can be restricted to a particular range.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.OPTIONAL">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">OPTIONAL</tt><big>(</big><em>*grammar</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.OPTIONAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that <em>grammar</em> is optional.  It will match if present, or it will match the empty string if <em>grammar</em> cannot be matched.</p>
+<p>If <em>grammar</em> is present in the matched input text, this element of the parse tree will contain a single grammar match object (the same as it would have if <tt class="docutils literal"><span class="pre">GRAMMAR(*grammar)</span></tt> had matched).  If <em>grammar</em> was not found, this element of the parse tree will contain <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt>.</p>
+<p>This construct is functionally equivalent to <tt class="docutils literal"><span class="pre">OR(grammar,</span> <span class="pre">EMPTY)</span></tt>.  (It is is also functionally similar to <tt class="docutils literal"><span class="pre">REPEAT(*grammar,</span> <span class="pre">min=0,</span> <span class="pre">max=1,</span> <span class="pre">collapse=True)</span></tt>, except that in the case of <a class="reference internal" href="#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a>, an empty-match produces no elements at all in the resulting parse tree (not even <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt>).)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.ZERO_OR_MORE">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">ZERO_OR_MORE</tt><big>(</big><em>*grammar</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.ZERO_OR_MORE" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a synonym for <tt class="docutils literal"><span class="pre">REPEAT(*grammar,</span> <span class="pre">min=0)</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.ONE_OR_MORE">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">ONE_OR_MORE</tt><big>(</big><em>*grammar</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.ONE_OR_MORE" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a synonym for <tt class="docutils literal"><span class="pre">REPEAT(*grammar,</span> <span class="pre">min=1)</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.LIST_OF">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">LIST_OF</tt><big>(</big><em>*grammar</em>, <em>sep=&quot;</em>, <em>&quot;</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.LIST_OF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match a list consisting of repetitions of <em>grammar</em> separated by <em>sep</em>.  As with other repetition grammars, the <em>min</em> and <em>max</em> keywords can also be used to restrict the number of matches to a certain range.</p>
+<p>Note: Although this is most commonly used with a literal separator (such as the default <tt class="docutils literal"><span class="pre">&quot;,&quot;</span></tt>), actually any (arbitrarily-complex) subgrammar can be specified for <em>sep</em> if desired.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modgrammar.NOT_FOLLOWED_BY">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">NOT_FOLLOWED_BY</tt><big>(</big><em>*grammar</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#modgrammar.NOT_FOLLOWED_BY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a successful match as long as the next text after this point does NOT match the specified grammar.</p>
+<p>When successful (that is, the next text in the input does not match the specified grammar), this element of the parse tree will contain <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt>, and no input text will be consumed.  When unsuccessful (that is, the next text does match), a <a class="reference internal" href="#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a> will be raised.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.ANY">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">ANY</tt><a class="headerlink" href="#modgrammar.ANY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match any single character.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.EMPTY">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">EMPTY</tt><a class="headerlink" href="#modgrammar.EMPTY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the empty string.</p>
+<p>Note: In most cases, <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> is also equivalent to <a class="reference internal" href="#modgrammar.EMPTY" title="modgrammar.EMPTY"><tt class="xref py py-const docutils literal"><span class="pre">EMPTY</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.BOL">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">BOL</tt><a class="headerlink" href="#modgrammar.BOL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the beginning of a line.</p>
+<p>This grammar does not actually consume any of the input text, but can be used to ensure that the next token must occur at the beginning of a new line (i.e. either the beginning of the file, or following an <a class="reference internal" href="#modgrammar.EOL" title="modgrammar.EOL"><tt class="xref py py-const docutils literal"><span class="pre">EOL</span></tt></a>).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.EOL">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">EOL</tt><a class="headerlink" href="#modgrammar.EOL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the end of a line.</p>
+<p>This grammar will match most common forms of line-end (newline, carriage-return, carriage-return + newline, or newline + carriage-return).  If you need something more specific, you may just want to use <a class="reference internal" href="#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a> instead.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.EOF">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">EOF</tt><a class="headerlink" href="#modgrammar.EOF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the end of the file.</p>
+<p>Note: This grammar will only match if the parse function is called with <tt class="docutils literal"><span class="pre">eof=True</span></tt> to indicate the end-of-file has been encountered.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.REST_OF_LINE">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">REST_OF_LINE</tt><a class="headerlink" href="#modgrammar.REST_OF_LINE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match everything up to (but not including) the next <a class="reference internal" href="#modgrammar.EOL" title="modgrammar.EOL"><tt class="xref py py-const docutils literal"><span class="pre">EOL</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="modgrammar.SPACE">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">SPACE</tt><a class="headerlink" href="#modgrammar.SPACE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match any string of whitespace.</p>
+<p>Note: This may not match as you expect if your grammar is whitespace-consuming (see the <a class="reference internal" href="#modgrammar.Grammar.grammar_whitespace" title="modgrammar.Grammar.grammar_whitespace"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_whitespace</span></tt></a> attribute).</p>
+</dd></dl>
+
+<p>The <tt class="xref py py-mod docutils literal"><span class="pre">modgrammar.extras</span></tt> module also contains some additional built-in grammars which can be useful in some contexts.</p>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<p>In some cases, it is necessary to refer to a portion of your grammar before it has actually been defined (for example, for recursive grammar definitions).  In this case, the <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> function can be used to refer to a grammar by name, which will be resolved to an actual grammar later.  (This construct can also be used to define a grammar which includes some &#8220;user-defined&#8221; sub-grammar, which the calling application can then provide at runtime.)</p>
+<dl class="function">
+<dt id="modgrammar.REF">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">REF</tt><big>(</big><em>ref_name</em>, <em>module=DEFAULT</em>, <em>default=None</em><big>)</big><a class="headerlink" href="#modgrammar.REF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a reference to a grammar named <em>ref_name</em>, to be resolved later.</p>
+<p>This can either be resolved by calling <a class="reference internal" href="#modgrammar.Grammar.grammar_resolve_refs" title="modgrammar.Grammar.grammar_resolve_refs"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_resolve_refs()</span></tt></a> prior to parsing, or, alternately, <a class="reference internal" href="#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> will automatically attempt to resolve any <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> whenever it is used in parsing, and will treat it the same as if it were actually an occurrence of the resolved grammar.</p>
+<p>By default, resolving a reference involves searching for a grammar class with the same name in the same python module.  The python module is determined based on the location where the <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> call occurred.  If you wish to use a different module to look for the grammar this <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> refers to, it can be provided in the <em>module</em> parameter.  If <em>module</em> is given as <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt>, then no module will be searched.</p>
+<p>If provided, <em>default</em> should contain a grammar which will be used if the given reference cannot be resolved.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="modgrammar.ParseError">
+<em class="property">exception </em><tt class="descclassname">modgrammar.</tt><tt class="descname">ParseError</tt><a class="headerlink" href="#modgrammar.ParseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised by the parser when the provided text cannot be matched against the grammar.</p>
+<dl class="docutils">
+<dt>This exception has several useful attributes:</dt>
+<dd><dl class="first attribute">
+<dt id="modgrammar.ParseError.grammar">
+<tt class="descname">grammar</tt><a class="headerlink" href="#modgrammar.ParseError.grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>The top-level grammar the parser was attempting to match.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.ParseError.buffer">
+<tt class="descname">buffer</tt><a class="headerlink" href="#modgrammar.ParseError.buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>The contents of the text buffer the parser was attempting to match against the grammar.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.ParseError.pos">
+<tt class="descname">pos</tt><a class="headerlink" href="#modgrammar.ParseError.pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position within the buffer at which the problem occurred.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.ParseError.char">
+<tt class="descname">char</tt><a class="headerlink" href="#modgrammar.ParseError.char" title="Permalink to this definition">¶</a></dt>
+<dd><p>The (total parsing) character position at which the problem occurred (similar to the <a class="reference internal" href="#modgrammar.GrammarParser.char" title="modgrammar.GrammarParser.char"><tt class="xref py py-attr docutils literal"><span class="pre">GrammarParser.char</span></tt></a> attribute).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.ParseError.line">
+<tt class="descname">line</tt><a class="headerlink" href="#modgrammar.ParseError.line" title="Permalink to this definition">¶</a></dt>
+<dd><p>The line at which the problem occurred (similar to the <a class="reference internal" href="#modgrammar.GrammarParser.line" title="modgrammar.GrammarParser.line"><tt class="xref py py-attr docutils literal"><span class="pre">GrammarParser.line</span></tt></a> attribute).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.ParseError.col">
+<tt class="descname">col</tt><a class="headerlink" href="#modgrammar.ParseError.col" title="Permalink to this definition">¶</a></dt>
+<dd><p>The column position within the line at which the problem occurred (similar to the <a class="reference internal" href="#modgrammar.GrammarParser.col" title="modgrammar.GrammarParser.col"><tt class="xref py py-attr docutils literal"><span class="pre">GrammarParser.col</span></tt></a> attribute).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="modgrammar.ParseError.expected">
+<tt class="descname">expected</tt><a class="headerlink" href="#modgrammar.ParseError.expected" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of possible sub-grammars which the parser expected to find at this position (but didn&#8217;t).</p>
+</dd></dl>
+
+<dl class="last attribute">
+<dt id="modgrammar.ParseError.message">
+<tt class="descname">message</tt><a class="headerlink" href="#modgrammar.ParseError.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>The text message which would be printed if this exception were printed.  (This is of the form &#8220;Expected ...: Found ...&#8221;)</p>
+</dd></dl>
+
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="exception">
+<dt id="modgrammar.ReferenceError">
+<em class="property">exception </em><tt class="descclassname">modgrammar.</tt><tt class="descname">ReferenceError</tt><a class="headerlink" href="#modgrammar.ReferenceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class for <a class="reference internal" href="#modgrammar.UnknownReferenceError" title="modgrammar.UnknownReferenceError"><tt class="xref py py-exc docutils literal"><span class="pre">UnknownReferenceError</span></tt></a> and <a class="reference internal" href="#modgrammar.BadReferenceError" title="modgrammar.BadReferenceError"><tt class="xref py py-exc docutils literal"><span class="pre">BadReferenceError</span></tt></a>.  It can be used to easily catch either exception.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="modgrammar.UnknownReferenceError">
+<em class="property">exception </em><tt class="descclassname">modgrammar.</tt><tt class="descname">UnknownReferenceError</tt><a class="headerlink" href="#modgrammar.UnknownReferenceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An attempt was made to resolve a <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> reference, but no grammar with the given name could be found, and no default was provided in the <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> declaration.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="modgrammar.BadReferenceError">
+<em class="property">exception </em><tt class="descclassname">modgrammar.</tt><tt class="descname">BadReferenceError</tt><a class="headerlink" href="#modgrammar.BadReferenceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An attempt was made to resolve a <a class="reference internal" href="#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> reference, and the reference name was resolved to an object, but the object is not a valid grammar object.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="modgrammar.InternalError">
+<em class="property">exception </em><tt class="descclassname">modgrammar.</tt><tt class="descname">InternalError</tt><a class="headerlink" href="#modgrammar.InternalError" title="Permalink to this definition">¶</a></dt>
+<dd><p>This exception is raised by the parser if something happens which should never happen.  It usually indicates that a grammar with a custom <a class="reference internal" href="#modgrammar.Grammar.grammar_parse" title="modgrammar.Grammar.grammar_parse"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_parse()</span></tt></a> definition has done something it shouldn&#8217;t.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="miscellaneous">
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="modgrammar.generate_ebnf">
+<tt class="descclassname">modgrammar.</tt><tt class="descname">generate_ebnf</tt><big>(</big><em>grammar</em>, <em>**opts</em><big>)</big><a class="headerlink" href="#modgrammar.generate_ebnf" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>(generator function)</em></p>
+<p>Take a given grammar and produce a description of the grammar in Extended Backus-Naur Form (EBNF).  This generator produces fully-formatted output lines suitable for writing to a file, etc.</p>
+<p>As there are a few different variants of EBNF in common use, as well as some aspects which could be considered a matter of preference when producing such descriptions, this function also accepts a variety of configurable options, specified as keyword parameters:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>wrap</em> (default 80)</dt>
+<dd>Wrap the output text at <em>wrap</em> columns.</dd>
+<dt><em>align</em> (default True)</dt>
+<dd>Align each entry so that all of the RHSes start on the same column.</dd>
+<dt><em>indent</em> (default True)</dt>
+<dd>The number of characters that subsequent (wrapped) lines should be indented.  Can be set to either a number or to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>.  If set to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt>, the indent will be auto-calculated to line up with the position of the RHS in the first line.</dd>
+<dt><em>expand_terminals</em> (default False)</dt>
+<dd>If grammars have subgrammars, show their expansion even if <a class="reference internal" href="#modgrammar.Grammar.grammar_terminal" title="modgrammar.Grammar.grammar_terminal"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_terminal</span></tt></a> is true.</dd>
+<dt><em>special_style</em> (default &#8220;desc&#8221;)</dt>
+<dd>How some grammars (which can&#8217;t be easily represented as EBNF) should be represented inside EBNF &#8220;special sequences&#8221;.  Valid options are &#8220;desc&#8221; (use the (human-readable) <a class="reference internal" href="#modgrammar.Grammar.grammar_desc" title="modgrammar.Grammar.grammar_desc"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_desc</span></tt></a> text), &#8220;name&#8221; (just use the grammar&#8217;s name), or &#8220;python&#8221; (use a repr-like syntax similar to the python syntax used to create them).</dd>
+</dl>
+</div></blockquote>
+<p>Additional options may also be offered by certain individual grammars.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">modgrammar</span></tt> &#8211; The Modular Grammar Engine</a><ul>
+<li><a class="reference internal" href="#grammar-classes">Grammar Classes</a><ul>
+<li><a class="reference internal" href="#class-attributes">Class Attributes</a></li>
+<li><a class="reference internal" href="#overridable-class-methods">Overridable Class Methods</a></li>
+<li><a class="reference internal" href="#useful-class-methods">Useful Class Methods</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#result-objects">Result Objects</a><ul>
+<li><a class="reference internal" href="#overridable-instance-methods">Overridable Instance Methods</a></li>
+<li><a class="reference internal" href="#useful-instance-attributes">Useful Instance Attributes</a></li>
+<li><a class="reference internal" href="#useful-instance-methods">Useful Instance Methods</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parser-objects">Parser Objects</a></li>
+<li><a class="reference internal" href="#built-in-grammars">Built-In Grammars</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Modgrammar Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/libref.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Modgrammar Tutorial"
+             >previous</a> |</li>
+        <li><a href="index.html">Modgrammar 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Alex Stewart &lt;alex@foogod.com&gt;.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

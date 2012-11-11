@@ -1,0 +1,852 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Modgrammar Tutorial &mdash; Modgrammar 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Modgrammar 0.9.0 documentation" href="index.html" />
+    <link rel="next" title="modgrammar – The Modular Grammar Engine" href="libref.html" />
+    <link rel="prev" title="The Modular Grammar Engine" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="libref.html" title="modgrammar – The Modular Grammar Engine"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="The Modular Grammar Engine"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Modgrammar 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="modgrammar-tutorial">
+<h1>Modgrammar Tutorial<a class="headerlink" href="#modgrammar-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="grammar-basics">
+<h2>Grammar Basics<a class="headerlink" href="#grammar-basics" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="creating-a-grammar">
+<h3>Creating a Grammar<a class="headerlink" href="#creating-a-grammar" title="Permalink to this headline">¶</a></h3>
+<p>The first thing we need to do before we can do any text parsing is to define the grammar (rules) we will be trying to match the text against.  This is usually done by creating a class definition for a new class based on the <tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt> base class, and then setting its <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> class attribute to describe the details of the actual grammar, so let&#8217;s start with a simple example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">modgrammar</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">LITERAL</span><span class="p">(</span><span class="s">&quot;Hello,&quot;</span><span class="p">),</span> <span class="n">LITERAL</span><span class="p">(</span><span class="s">&quot;world!&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Some things to note here:  First, the <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> attribute will always contain a list of other grammars.  In this case, we&#8217;ve used two <a class="reference internal" href="libref.html#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a> grammars to make up our new grammar.  <a class="reference internal" href="libref.html#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a> is a built-in function provided by the <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> module which returns a grammar which will match a specific literal string (in this case, the first one will (only) match the string &#8220;Hello,&#8221;, and the second one will match &#8220;world!&#8221;).  Because our grammar is composed of these two sub-grammars, our grammar will only match a string if it matches both of them, in sequence, so our grammar will only match a piece of text if it contains &#8220;Hello, world!&#8221;.</p>
+<p>As a side-note, here, instead of <tt class="docutils literal"><span class="pre">LITERAL(&quot;Hello,&quot;)</span></tt>, we could also have used its shorter alias, <tt class="docutils literal"><span class="pre">L(&quot;Hello,&quot;)</span></tt>.  Actually, in most cases where grammars are required, if you just provide a string value, <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> will automatically convert it into a <a class="reference internal" href="libref.html#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a> grammar for you, so we really could have just used plain strings in our grammar definition, with the same results:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;Hello,&quot;</span><span class="p">,</span> <span class="s">&quot;world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So we have a grammar defined, and that&#8217;s all well and good, but how do we actually use it now that we&#8217;ve got it?  Well, next we need to create a <a class="reference internal" href="libref.html#modgrammar.GrammarParser" title="modgrammar.GrammarParser"><tt class="xref py py-class docutils literal"><span class="pre">GrammarParser</span></tt></a> object associated with the grammar.  This is done by calling the <a class="reference internal" href="libref.html#modgrammar.Grammar.parser" title="modgrammar.Grammar.parser"><tt class="xref py py-meth docutils literal"><span class="pre">parser()</span></tt></a> method on our newly defined <tt class="xref py py-class docutils literal"><span class="pre">MyGrammar</span></tt> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This parser object can then be used to take pieces of text and attempt to match them against the associated grammar.  Parser objects have several different methods for doing this, depending on whether you&#8217;re reading from a file, parsing all your text at once, getting it a bit at a time, etc, but for now we&#8217;ll stick to trying to parse a single string.  To do this, just call the <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Congratulations!  If you&#8217;re following along in your own window, you have just successfully parsed a piece of text using a custom grammar and now have a parse result object containing all of the relevant information.  Let&#8217;s take a look:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">MyGrammar&lt;&#39;Hello,&#39;, &#39;world!&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">string</span>
+<span class="go">&#39;Hello, world!&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(L(&#39;Hello,&#39;)&lt;&#39;Hello,&#39;&gt;, L(&#39;world!&#39;)&lt;&#39;world!&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>As you can see, parse result objects have a couple of useful attributes.  <a class="reference internal" href="libref.html#modgrammar.Grammar.string" title="modgrammar.Grammar.string"><tt class="xref py py-attr docutils literal"><span class="pre">string</span></tt></a> contains the full text that the grammar matched.  The <a class="reference internal" href="libref.html#modgrammar.Grammar.elements" title="modgrammar.Grammar.elements"><tt class="xref py py-attr docutils literal"><span class="pre">elements</span></tt></a> attribute contains result objects for each part of the sub-grammar we defined (typically, there will be one entry in <a class="reference internal" href="libref.html#modgrammar.Grammar.elements" title="modgrammar.Grammar.elements"><tt class="xref py py-attr docutils literal"><span class="pre">elements</span></tt></a> for each entry in the <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> attribute of the grammar class).  The <tt class="xref py py-func docutils literal"><span class="pre">repr()</span></tt> of the object also reflects (in a slightly briefer form) the <a class="reference internal" href="libref.html#modgrammar.Grammar.elements" title="modgrammar.Grammar.elements"><tt class="xref py py-attr docutils literal"><span class="pre">elements</span></tt></a> of the match, for descriptive purposes.</p>
+<p>As a convenience, it&#8217;s also possible to access individual sub-elements by just looking up their index on the result object itself (without having to reference the <a class="reference internal" href="libref.html#modgrammar.Grammar.elements" title="modgrammar.Grammar.elements"><tt class="xref py py-attr docutils literal"><span class="pre">elements</span></tt></a> attribute directly):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">L(&#39;Hello,&#39;)&lt;&#39;Hello,&#39;&gt;</span>
+</pre></div>
+</div>
+<p>The particularly astute might have already noticed something else about these result objects, too:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">MyGrammar</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>That&#8217;s right, the results we get back from parsing with the <tt class="xref py py-class docutils literal"><span class="pre">MyGrammar</span></tt> grammar class are actually instances of that class.  Thus, the class defines the grammar, and each instance of that class is a result of matching that grammar against some text.  This actually turns out to be very powerful, but we&#8217;ll get into a lot of that later.  One of the most immediate benefits of this, though, is that you can always tell which piece of grammar was matched to produce a particular result just by checking what type of object the result is.</p>
+</div>
+<div class="section" id="making-things-more-interesting">
+<h3>Making Things More Interesting<a class="headerlink" href="#making-things-more-interesting" title="Permalink to this headline">¶</a></h3>
+<p>So far, our grammar works, but it&#8217;s pretty boring.  It only matches one literal phrase.  Let&#8217;s start making it a little more interesting, shall we?</p>
+<p>First off, let&#8217;s try giving the speaker a choice:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OR</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">,</span> <span class="s">&quot;Goodbye&quot;</span><span class="p">),</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="s">&quot;world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As one might guess, the <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> construct above will match either &#8220;Hello&#8221; or &#8220;Goodbye&#8221;.  We used two literals here, but you can actually use any grammars you want with <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> (and as many as you want).  When parsing, it will try each of the sub-grammars in order until it finds one that matches (as long as the rest of the larger grammar matches too, of course).</p>
+<p>If you prefer, it&#8217;s also possible to do <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> grammars by just combining two or more sub-grammars together with the or-operator (<tt class="docutils literal"><span class="pre">|</span></tt>), like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">),</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="s">&quot;world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This actually produces exactly the same result as the previous example.  Note that this is one of the few times where you can&#8217;t just use plain strings to mean literals, because if you tried to do <tt class="docutils literal"><span class="pre">&quot;Hello&quot;</span> <span class="pre">|</span> <span class="pre">&quot;Goodbye&quot;</span></tt>, the python interpreter wouldn&#8217;t know that you had intended the two strings to be grammar-literals, so it wouldn&#8217;t know how to &#8220;or&#8221; them together:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="s">&quot;Hello&quot;</span> <span class="o">|</span> <span class="s">&quot;Goodbye&quot;</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">TypeError: unsupported operand type(s) for |</span>: <span class="n">&#39;str&#39; and &#39;str&#39;</span>
+</pre></div>
+</div>
+<p>As long as you make sure at least one of the operands is a grammar class of some sort, though, it can usually figure it out:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">L</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="s">&quot;Goodbye&quot;</span>
+<span class="go">&lt;Grammar: (L(&#39;Hello&#39;) | L(&#39;Goodbye&#39;))&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&quot;Hello&quot;</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">)</span>
+<span class="go">&lt;Grammar: (L(&#39;Hello&#39;) | L(&#39;Goodbye&#39;))&gt;</span>
+</pre></div>
+</div>
+<p>(It&#8217;s usually just best to make sure all of them are explicitly converted to grammars first, though, as we did above)</p>
+<p>Since we&#8217;re adding choices, let&#8217;s also add a bit more flexibility in the form of an optional portion of the phrase:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">),</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">OPTIONAL</span><span class="p">(</span><span class="s">&quot;cruel&quot;</span><span class="p">),</span> <span class="s">&quot;world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As you probably figured out already, this will allow us to match both &#8220;Goodbye, world!&#8221; and &#8220;Goodbye, cruel world!&#8221; (and, somewhat masochistically, also &#8220;Hello, cruel world!&#8221;, but we won&#8217;t worry about that now).  What does this look like in our results?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, world!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(L(&#39;Hello,&#39;)&lt;&#39;Hello,&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, None, L(&#39;world!&#39;)&lt;&#39;world!&#39;&gt;)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Goodbye, cruel world!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(L(&#39;Goodbye&#39;)&lt;&#39;Goodbye&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, L(&#39;cruel&#39;)&lt;&#39;cruel&#39;&gt;, L(&#39;world!&#39;)&lt;&#39;world!&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>As you can see, <a class="reference internal" href="libref.html#modgrammar.OPTIONAL" title="modgrammar.OPTIONAL"><tt class="xref py py-func docutils literal"><span class="pre">OPTIONAL()</span></tt></a> will result in the matching sub-grammar element if there is a match, or if there isn&#8217;t a match, it will produce <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> in that spot.</p>
+<p>Note, also, that we&#8217;ve been using literals for most of the sub-grammars here, but, as with <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a>, <a class="reference internal" href="libref.html#modgrammar.OPTIONAL" title="modgrammar.OPTIONAL"><tt class="xref py py-func docutils literal"><span class="pre">OPTIONAL()</span></tt></a> can actually take any kind of grammar as an argument, so you could, for example, nest these two constructs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">),</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">OPTIONAL</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;cruel&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;wonderful&quot;</span><span class="p">)),</span> <span class="s">&quot;world!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>...or do even more complicated things.  In fact, by just combining the couple of tools we&#8217;ve used so far in different ways, it&#8217;s possible to construct a whole world of grammars, and we&#8217;ve just gotten started.</p>
+</div>
+<div class="section" id="going-deeper-nested-grammars">
+<h3>Going Deeper: Nested Grammars<a class="headerlink" href="#going-deeper-nested-grammars" title="Permalink to this headline">¶</a></h3>
+<p>Our grammar definition is starting to get a bit long, and we&#8217;re going to want to make it even more complex, so maybe it&#8217;s time we started splitting it up into sub-grammars.  How do we do that?  Easy, just create some more <a class="reference internal" href="libref.html#modgrammar.Grammar" title="modgrammar.Grammar"><tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt></a> classes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">OpeningWord</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">WorldPhrase</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OPTIONAL</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;cruel&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;wonderful&quot;</span><span class="p">)),</span> <span class="s">&quot;world&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>...and then hook them together in the main one:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OpeningWord</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">WorldPhrase</span><span class="p">,</span> <span class="s">&quot;!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There we go.. we now have not just one grammar, but a whole grammar tree (well, ok, a small tree... maybe a bush?).  As you can see, you can use <a class="reference internal" href="libref.html#modgrammar.Grammar" title="modgrammar.Grammar"><tt class="xref py py-class docutils literal"><span class="pre">Grammar</span></tt></a> classes you create in exactly the same way as the stock grammars we were already using.  The one thing to note here, of course, is that you have to define them before you can reference them, which is why the <tt class="xref py py-class docutils literal"><span class="pre">MyGrammar</span></tt> class had to be defined last.</p>
+<p>So, let&#8217;s see how it works:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, world!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(OpeningWord&lt;&#39;Hello&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, WorldPhrase&lt;None, &#39;world&#39;&gt;, L(&#39;!&#39;)&lt;&#39;!&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>You can see now that, since we&#8217;ve defined some more levels in our grammar, our result objects will have some more levels, too.  The top-level result object has four elements, each corresponding to the four sub-grammars we specified in its <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar" title="modgrammar.Grammar.grammar"><tt class="xref py py-attr docutils literal"><span class="pre">grammar</span></tt></a> attribute (an <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt> result, the literal comma, a <tt class="xref py py-class docutils literal"><span class="pre">WorldPhrase</span></tt> result, and the literal exclamation point).  We can look at the third element (the <tt class="xref py py-class docutils literal"><span class="pre">WorldPhrase</span></tt> match) to get more details on that part of things:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(None, L(&#39;world&#39;)&lt;&#39;world&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>As we would expect, its elements correspond to the <a class="reference internal" href="libref.html#modgrammar.OPTIONAL" title="modgrammar.OPTIONAL"><tt class="xref py py-func docutils literal"><span class="pre">OPTIONAL()</span></tt></a> phrase (which we didn&#8217;t use, so it&#8217;s <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt>), and the literal &#8220;world&#8221;.</p>
+<p>Now that we&#8217;ve got things broken up this way, though, we can start making things more complex while still keeping them reasonably organized.  Let&#8217;s add some new grammar for a completely different style of greeting:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FirstName</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORD</span><span class="p">(</span><span class="s">&quot;A-Z&quot;</span><span class="p">,</span> <span class="s">&quot;a-z&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">LastName</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORD</span><span class="p">(</span><span class="s">&quot;A-Z&quot;</span><span class="p">,</span> <span class="s">&quot;a-z&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">MyNameIs</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;my name is&quot;</span><span class="p">,</span> <span class="n">FirstName</span><span class="p">,</span> <span class="n">OPTIONAL</span><span class="p">(</span><span class="n">LastName</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>And we&#8217;ll update our <tt class="xref py py-class docutils literal"><span class="pre">MyGrammar</span></tt> to add the new option:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OpeningWord</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">WorldPhrase</span> <span class="o">|</span> <span class="n">MyNameIs</span><span class="p">,</span> <span class="s">&quot;!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There!  Now let&#8217;s give it a whirl:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, wonderful world!&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;wonderful world&#39;, &#39;!&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Inigo Montoya&#39;, &#39;!&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Remember that bit above about identifying results based on their class?  Here&#8217;s an example of where it comes in handy.  Both of these are valid matches to the grammar, but they&#8217;re two very different sorts of sentences.  How do we tell what type of sentence we&#8217;re dealing with?  Well, just look at the type of the third element:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">WorldPhrase</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">MyNameIs</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>You may have also noticed we introduced a new construct, too: <tt class="docutils literal"><span class="pre">WORD(&quot;A-Z&quot;,</span> <span class="pre">&quot;a-z&quot;)</span></tt>.  This is a very handy one, so you&#8217;ll probably end up using it frequently.  It basically means &#8216;match a sequence of any characters, where the first one is in the set &#8220;A-Z&#8221; and all the following ones are in the set &#8220;a-z&#8221;&#8217;.  Obviously, you can use whatever set of characters fits your purposes.  The rules are basically the same as for regular expression character-ranges (<tt class="docutils literal"><span class="pre">[]</span></tt> inside regular expressions), so you could say &#8220;ABCabc&#8221;, or &#8220;A-Ca-c&#8221;, etc.  As with regular expressions, you can also put a &#8220;^&#8221; at the beginning of the string to mean &#8220;anything except the following characters&#8221;.  (Note: You can also leave out the second argument and it&#8217;ll default to the same set as the first, so <tt class="docutils literal"><span class="pre">WORD(&quot;A-Z&quot;)</span></tt> is the same as <tt class="docutils literal"><span class="pre">WORD(&quot;A-Z&quot;,</span> <span class="pre">&quot;A-Z&quot;)</span></tt>)</p>
+<p>So what if we wanted to be able to include multiple phrases in the same sentence?  Well, it&#8217;s also possible to specify that a particular sub-grammar can be repeated, using the <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a> construct:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OpeningWord</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">REPEAT</span><span class="p">(</span><span class="n">WorldPhrase</span> <span class="o">|</span> <span class="n">MyNameIs</span><span class="p">),</span> <span class="s">&quot;!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There, now we can have any number of <tt class="xref py py-class docutils literal"><span class="pre">WorldPhrase</span></tt> or <tt class="xref py py-class docutils literal"><span class="pre">MyNameIs</span></tt> matches before the final exclamation point:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, cruel world my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(OpeningWord&lt;&#39;Hello&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, &lt;REPEAT&gt;&lt;&#39;cruel world&#39;, &#39;my name is Inigo Montoya&#39;&gt;, L(&#39;!&#39;)&lt;&#39;!&#39;&gt;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(WorldPhrase&lt;&#39;cruel&#39;, &#39;world&#39;&gt;, MyNameIs&lt;&#39;my name is&#39;, &#39;Inigo&#39;, &#39;Montoya&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>As you can see, the third element is now a <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a> match, which contains a list of the (multiple) phrases it was able to match.  But wait a minute, something&#8217;s not quite right at the moment.  If we&#8217;re going to be correct about things, there really should be a comma between the &#8220;cruel world&#8221; and the &#8220;my name is ...&#8221;.  We could turn the <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a> into <tt class="docutils literal"><span class="pre">REPEAT(WorldPhrase</span> <span class="pre">|</span> <span class="pre">MyNameIs,</span> <span class="pre">&quot;,&quot;)</span></tt>, but then we&#8217;d have an awkward trailing comma at the end.  There is, in fact, a better way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OpeningWord</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">LIST_OF</span><span class="p">(</span><span class="n">WorldPhrase</span> <span class="o">|</span> <span class="n">MyNameIs</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">),</span> <span class="s">&quot;!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Because it&#8217;s so common, the <a class="reference internal" href="libref.html#modgrammar.LIST_OF" title="modgrammar.LIST_OF"><tt class="xref py py-func docutils literal"><span class="pre">LIST_OF()</span></tt></a> construct was created specifically to deal with this sort of case.  It&#8217;s basically like <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a>, except that you can specify a separator that should come between each repeated occurrence (but not at the beginning or end), so now we can have multiple sentiments in our sentence, but they have to be separated by commas:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, cruel world, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(WorldPhrase&lt;&#39;wonderful&#39;, &#39;world&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, MyNameIs&lt;&#39;my name is&#39;, &#39;Inigo&#39;, &#39;Montoya&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>Advanced Tip: The argument to <em>sep</em> is usually a literal string, but can in fact be any grammar you want, even complex ones (so, for example, you could specify an <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> grammar to allow any of several different possible separators).</p>
+<p>One last thing:  Currently our grammar will match a potentially infinite number of repetitions for its second part.  What if we wanted to limit that a bit, say to only allowing one or two repetitions?  The <em>min</em> and <em>max</em> arguments to <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a> and <a class="reference internal" href="libref.html#modgrammar.LIST_OF" title="modgrammar.LIST_OF"><tt class="xref py py-func docutils literal"><span class="pre">LIST_OF()</span></tt></a> can be used to control how many times a match can repeat.  <em>min</em> automatically defaults to 1, but we can set <em>max</em> to restrict the maximum bounds:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OpeningWord</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">LIST_OF</span><span class="p">(</span><span class="n">WorldPhrase</span> <span class="o">|</span> <span class="n">MyNameIs</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="s">&quot;!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now it won&#8217;t let us go too far overboard with our sentences:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, cruel world!&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;cruel world&#39;, &#39;!&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, cruel world, wonderful world!&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;cruel world, wonderful world&#39;, &#39;!&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, cruel world, wonderful world, cruel world!&quot;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">modgrammar.ParseError: [line 1, column 91] Expected &#39;!&#39;</span>: <span class="n">found &#39;, cruel world!&#39;</span>
+</pre></div>
+</div>
+<p>We&#8217;ll get into <a class="reference internal" href="libref.html#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a> in more detail later on, but as you can see, it happily accepted one or two of the WorldPhrases, but not three.</p>
+<p>(<em>min</em> and <em>max</em> actually work in all kinds of places (for example, they also work for <a class="reference internal" href="libref.html#modgrammar.WORD" title="modgrammar.WORD"><tt class="xref py py-func docutils literal"><span class="pre">WORD()</span></tt></a> constructs).  You can also use the <em>count</em> parameter instead if you want to set <em>min</em> and <em>max</em> to the same value.)</p>
+</div>
+<div class="section" id="full-circle-references-and-recursion">
+<h3>Full Circle: References and Recursion<a class="headerlink" href="#full-circle-references-and-recursion" title="Permalink to this headline">¶</a></h3>
+<p>There&#8217;s one last piece of the puzzle that needs to be covered if we&#8217;re going to be able to create all possible sorts of grammars.  Up to now, we&#8217;ve been defining sub-grammar classes, and then pulling them all together into one larger grammar, but this does have one problem.  Since the sub-grammar classes have to be defined before they can be referenced in other grammars, all of the sub-grammars must come before any of the larger grammars that use them.  This is fine for many applications, but what if you need your grammar to refer to <em>itself</em> in some way?</p>
+<p>Let&#8217;s take an example of a (very) basic mathematical-expression grammar:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Number</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORD</span><span class="p">(</span><span class="s">&quot;0-9&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">Operator</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;+&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;-&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;*&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">Expression</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">Number</span><span class="p">,</span> <span class="n">Operator</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This grammar will handle very basic constructs like &#8220;1 + 1&#8221; or &#8220;45 / 12&#8221;, but what if we wanted to add parenthetical sub-expressions to it (for example, &#8220;1 + (2 * 5)&#8221;)?  Well, let&#8217;s create another class to cover that case:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>class ParenExpr (Grammar):</dt>
+<dd>grammar = (&#8220;(&#8221;, Expression, &#8221;)&#8221;)</dd>
+</dl>
+</div></blockquote>
+<p>And then update Expression so it includes that option:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>class Expression (Grammar):</dt>
+<dd>grammar = (Number | ParenExpr, Operator, Number | ParenExpr)</dd>
+</dl>
+</div></blockquote>
+<p>But wait a minute..  <tt class="xref py py-class docutils literal"><span class="pre">ParenExpr</span></tt> is referenced by <tt class="xref py py-class docutils literal"><span class="pre">Expression</span></tt> so it has to come first, but <tt class="xref py py-class docutils literal"><span class="pre">Expression</span></tt> is referenced by <tt class="xref py py-class docutils literal"><span class="pre">ParenExpr</span></tt>, so it has to come first.  How do we solve this?  This is where the special <a class="reference internal" href="libref.html#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> function comes in.   If in our <tt class="xref py py-class docutils literal"><span class="pre">ParenExpr</span></tt> definition, instead of referencing <tt class="xref py py-class docutils literal"><span class="pre">Expression</span></tt> directly, we instead did the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ParenExpr</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">,</span> <span class="n">REF</span><span class="p">(</span><span class="s">&quot;Expression&quot;</span><span class="p">),</span> <span class="s">&quot;)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>...then we can put <tt class="xref py py-class docutils literal"><span class="pre">ParenExpr</span></tt> before <tt class="xref py py-class docutils literal"><span class="pre">Expression</span></tt> with no problem.  How does this affect the parse results?  Not at all.  In fact, you can actually use a <a class="reference internal" href="libref.html#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a> construct anywhere you would normally just reference a grammar directly and it will work exactly the same way, so the above functions exactly the same as if we&#8217;d just used <tt class="xref py py-class docutils literal"><span class="pre">Expression</span></tt> directly (except without the chicken-and-egg problem).</p>
+<p>There is one disadvantage to using <a class="reference internal" href="libref.html#modgrammar.REF" title="modgrammar.REF"><tt class="xref py py-func docutils literal"><span class="pre">REF()</span></tt></a>, though.  Every time the grammar is parsed and it comes to that point, it needs to do a lookup to figure out what sub-grammar to use.  This lookup isn&#8217;t tremendously expensive, but in most cases it&#8217;s still something we don&#8217;t really need to do over and over again.  Once we&#8217;ve actually defined all our grammar classes, it should be possible to just do the lookups and resolve everything once, and then not need to do it again.</p>
+<p>And, in fact, this is what the <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_resolve_refs" title="modgrammar.Grammar.grammar_resolve_refs"><tt class="xref py py-meth docutils literal"><span class="pre">grammar_resolve_refs()</span></tt></a> method of the grammar class is for.  Once we&#8217;ve defined all our grammar classes, we can just call that method on the top-level grammar and it will go through the whole thing and resolve any references it can and replace them with the actual grammar classes they resolve to.  You can see the results before and after running grammar_resolve_refs by looking at the <tt class="xref py py-class docutils literal"><span class="pre">ParenExpr</span></tt> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ParenExpr</span><span class="o">.</span><span class="n">grammar</span>
+<span class="go">(&lt;Grammar: L(&#39;(&#39;)&gt;, &lt;Grammar: REF(&#39;Expression&#39;)&gt;, &lt;Grammar: L(&#39;)&#39;)&gt;)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Expression</span><span class="o">.</span><span class="n">grammar_resolve_refs</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ParenExpr</span><span class="o">.</span><span class="n">grammar</span>
+<span class="go">(&lt;Grammar: L(&#39;(&#39;)&gt;, &lt;Grammar[Expression]: ((Number | ParenExpr), Operator, (Number | ParenExpr))&gt;, &lt;Grammar: L(&#39;)&#39;)&gt;)</span>
+</pre></div>
+</div>
+<p>And presto, a fully recursive grammar:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Expression</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;(1*2)+(3*(4/(5-6)))&quot;</span><span class="p">)</span>
+<span class="go">Expression&lt;&#39;(1*2)&#39;, &#39;+&#39;, &#39;(3*(4/(5-6)))&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Note that while this grammar can theoretically support an unlimited depth of recursion, from a practical perspective each time the <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> engine descends into a sub-grammar it involves an associated method call, so the actual depth is limited by the python interpreter&#8217;s stack.  (For most python implementations, however, the stack is large enough that this is usually not a large concern.)</p>
+<div class="section" id="left-recursion">
+<h4>Left Recursion<a class="headerlink" href="#left-recursion" title="Permalink to this headline">¶</a></h4>
+<p>We should also talk for a moment about what is known as &#8220;left recursion&#8221;.  This is a situation where a grammar is defined in such a way that the first component of the grammar is actually a recursive reference to itself.  Let&#8217;s start with an example of &#8220;right recursion&#8221;:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RightRecursive</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="n">OPTIONAL</span><span class="p">(</span><span class="n">REF</span><span class="p">(</span><span class="s">&quot;RightRecursive&quot;</span><span class="p">)))</span>
+
+<span class="n">RightRecursive</span><span class="o">.</span><span class="n">grammar_resolve_refs</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This (recursive) grammar will match any number of literal &#8220;A&#8221;s, with the first element being an &#8220;A&#8221;, and the second being a recursive <tt class="xref py py-class docutils literal"><span class="pre">RightRecursive</span></tt> match, like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">RightRecursive</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;AAAB&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">RightRecursive&lt;&#39;A&#39;, &#39;AA&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">RightRecursive&lt;&#39;A&#39;, &#39;A&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">RightRecursive&lt;&#39;A&#39;, None&gt;</span>
+</pre></div>
+</div>
+<p>Now let&#8217;s look at the same thing, but done in a left-recursive way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">LeftRecursive</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OPTIONAL</span><span class="p">(</span><span class="n">REF</span><span class="p">(</span><span class="s">&quot;LeftRecursive&quot;</span><span class="p">)),</span> <span class="s">&quot;A&quot;</span><span class="p">)</span>
+
+<span class="n">LeftRecursive</span><span class="o">.</span><span class="n">grammar_resolve_refs</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now, theoretically, according to the rules of defining grammars, this is a perfectly valid grammar definition: it should match the same thing as <tt class="xref py py-class docutils literal"><span class="pre">RightRecursive</span></tt>, but just with the recursive part being the first element of each match and the literal being the second.  The problem, however, is that since the <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> parser works in a left-to-right order, the first thing it will try to match is the first sub-grammar, which is a reference to <tt class="xref py py-class docutils literal"><span class="pre">LeftRecursive</span></tt>, so it will try to match the first sub-grammar of that, which is a reference to <tt class="xref py py-class docutils literal"><span class="pre">LeftRecursive</span></tt>, and so on, and so on.  The end result is that it will recurse infinitely (or really, until it runs out of stack space) before it ever starts actually matching anything at all:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">LeftRecursive</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;AAAB&quot;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">RuntimeError</span>: <span class="n">maximum recursion depth exceeded in __instancecheck__</span>
+</pre></div>
+</div>
+<p>There are a couple of different techniques for dealing with left-recursion in the computer science world, but they are non-trivial to implement and at the moment the <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> parser does not have any support for this.  The good news is that it is usually possible to rewrite these sorts of constructs in other ways to avoid the problem to begin with.</p>
+</div>
+</div>
+<div class="section" id="customizing-general-behaviors">
+<h3>Customizing General Behaviors<a class="headerlink" href="#customizing-general-behaviors" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="whitespace-handling">
+<h4>Whitespace Handling<a class="headerlink" href="#whitespace-handling" title="Permalink to this headline">¶</a></h4>
+<p>Up to now we&#8217;ve been sorta glossing over one of the default behaviors of these grammars: whitespace handling.  As you may or may not have noticed, up to now all of our grammars have been whitespace-consuming, meaning that they automatically allow any amount of whitespace to come between two tokens, and will skip right over it.  Thus, in our <tt class="xref py py-class docutils literal"><span class="pre">Expression</span></tt> grammar above, it would match not only &#8220;1+1&#8221;, but also &#8220;1 + 1&#8221;, or even &#8220;1\t+\r1&#8221; all equally.  This is convenient for many applications where whitespace really doesn&#8217;t matter, but what if it should?</p>
+<p>Luckily, this behavior is configurable.  If you would prefer that your grammar <em>not</em> quietly ignore whitespace, there are a couple of ways to do this:</p>
+<ol class="arabic simple">
+<li>If you only want to change this for certain grammar classes, you can set the <em>grammar_whitespace</em> attribute of the classes to <tt class="xref py py-const docutils literal"><span class="pre">False</span></tt> when you define them.  This is good for one or two classes, but is not really ideal if you want this to be the case for your entire grammar, as not only do you need to set it for every class definition, but you will also need to make sure to explicitly set it (via the <em>whitespace</em> parameter) whenever you use <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a>, <a class="reference internal" href="libref.html#modgrammar.LIST_OF" title="modgrammar.LIST_OF"><tt class="xref py py-func docutils literal"><span class="pre">LIST_OF()</span></tt></a>, <a class="reference internal" href="libref.html#modgrammar.GRAMMAR" title="modgrammar.GRAMMAR"><tt class="xref py py-func docutils literal"><span class="pre">GRAMMAR()</span></tt></a>, etc, etc.</li>
+<li>You can set <tt class="docutils literal"><span class="pre">modgrammar.grammar_whitespace</span> <span class="pre">=</span> <span class="pre">False</span></tt>.  This will cause the <em>grammar_whitespace</em> attribute on all grammar classes default to <tt class="xref py py-const docutils literal"><span class="pre">False</span></tt>.  Note, however, that this will change the behavior of <em>all</em> grammars by default, even grammars in other modules which may use the same instance of <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a>, so this is generally not recommended.</li>
+<li>The best way, usually, is to set <tt class="docutils literal"><span class="pre">grammar_whitespace</span> <span class="pre">=</span> <span class="pre">False</span></tt> at the module level of the module in which you&#8217;re defining your grammar classes.  Whenever you create a grammar class, <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> will look for this setting at the module level and use it instead of the global default, if found.</li>
+</ol>
+<p>Tip: Even if you do want your grammars to skip whitespace, it&#8217;s a good idea to set <em>grammar_whitespace</em> explicitly at the beginning of your module just to be sure.  This way, if somehow the global <tt class="docutils literal"><span class="pre">modgrammar.grammar_whitespace</span></tt> gets set to something different than you expect, it won&#8217;t affect any of your defined grammar classes.</p>
+<p>It is also possible to configure your grammars to consume whitespace, but specify a different criteria for what constitutes &#8220;whitespace&#8221;.  For example, you may want to automatically skip over spaces and tabs, but not line-end characters.  To do this, instead of setting <em>grammar_whitespace</em> to <tt class="xref py py-const docutils literal"><span class="pre">True</span></tt> or <tt class="xref py py-const docutils literal"><span class="pre">False</span></tt>, you can set it to a regular expression object instead (see the <tt class="xref py py-mod docutils literal"><span class="pre">re</span></tt> module for more info on regular expressions).  In this case, the provided regular expression will be used to determine how much (if any) of the string should be skipped over to get to the next token.</p>
+</div>
+<div class="section" id="greed-is-good-but-not-always">
+<h4>Greed Is Good (But Not Always)<a class="headerlink" href="#greed-is-good-but-not-always" title="Permalink to this headline">¶</a></h4>
+<p>By default, all the grammars you define will be &#8220;greedy&#8221;.  That means that whenever you use <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a> or its variants, or things like <a class="reference internal" href="libref.html#modgrammar.WORD" title="modgrammar.WORD"><tt class="xref py py-func docutils literal"><span class="pre">WORD()</span></tt></a>, they will automatically try to find the longest possible match first.  As an example, consider the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">GreedyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="n">REPEAT</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;C&quot;</span><span class="p">)),</span> <span class="s">&quot;C&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This grammar will match an &#8220;A&#8221;, followed by a number of &#8220;A&#8221;s, &#8220;B&#8221;s, or &#8220;C&#8221;s, finally terminated by a &#8220;C&#8221;.  If we try matching a few texts:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">GreedyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;ABCD&quot;</span><span class="p">)</span>
+<span class="go">GreedyGrammar&lt;&#39;A&#39;, &#39;B&#39;, &#39;C&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GreedyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;ABCBCD&quot;</span><span class="p">)</span>
+<span class="go">GreedyGrammar&lt;&#39;A&#39;, &#39;BCB&#39;, &#39;C&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GreedyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;ABCCCCCCD&quot;</span><span class="p">)</span>
+<span class="go">GreedyGrammar&lt;&#39;A&#39;, &#39;BCCCCC&#39;, &#39;C&#39;&gt;</span>
+</pre></div>
+</div>
+<p>As you can see, in each case the match it found was the longest one possible.  However, if we want to change this behavior, we can configure this using the <em>greedy</em> parameter to <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a>:</p>
+<div class="highlight-python"><pre>class NonGreedyGrammar (Grammar):
+    grammar = ("A", REPEAT(L("A") | L("B") | L("C"), greedy=False), "C")
+
+&gt;&gt;&gt; NonGreedyGrammar.parser().parse_string("ABCD")
+NonGreedyGrammar&lt;'A', 'B', 'C'&gt;
+&gt;&gt;&gt; NonGreedyGrammar.parser().parse_string("ABCBCD")
+NonGreedyGrammar&lt;'A', 'B', 'C'&gt;
+&gt;&gt;&gt; NonGreedyGrammar.parser().parse_string("ABCCCCCCD")
+NonGreedyGrammar&lt;'A', 'B', 'C'&gt;</pre>
+</div>
+<p>Now the grammar matches the smallest possible match instead.</p>
+<p>Note, however, that any match returned must always match the entire grammar, so if, for example, we added a &#8220;D&#8221; to the end of the grammar, then even a non-greedy grammar would have to match the full strings above, because those would be the only matches which have a final &#8220;D&#8221;:</p>
+<div class="highlight-python"><pre>class NonGreedyGrammar (Grammar):
+    grammar = ("A", REPEAT(L("A") | L("B") | L("C"), greedy=False), "C", "D")
+
+&gt;&gt;&gt; NonGreedyGrammar.parser().parse_string("ABCD")
+NonGreedyGrammar&lt;'A', 'B', 'C', 'D'&gt;
+&gt;&gt;&gt; NonGreedyGrammar.parser().parse_string("ABCBCD")
+NonGreedyGrammar&lt;'A', 'BCB', 'C', 'D'&gt;
+&gt;&gt;&gt; NonGreedyGrammar.parser().parse_string("ABCCCCCCD")
+NonGreedyGrammar&lt;'A', 'BCCCCC', 'C', 'D'&gt;</pre>
+</div>
+</div>
+</div>
+<div class="section" id="using-the-results">
+<h3>Using the Results<a class="headerlink" href="#using-the-results" title="Permalink to this headline">¶</a></h3>
+<p>So we&#8217;ve pretty thoroughly covered most of the details of actually creating grammars, now it&#8217;s time to get into the real point of the whole exercise:  results!</p>
+<p>As we showed earlier, when you parse some text using a parser, you will (hopefully) get back a result object, and we showed some of the general attributes of result objects, but there&#8217;s some other nifty tricks that can be done with them as well.</p>
+<p>In many applications, for example, you may not actually care about the whole parse tree, but only one particular bit of it.  Let&#8217;s go back to our modified &#8220;hello world&#8221; example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, cruel world, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">elements</span>
+<span class="go">(WorldPhrase&lt;&#39;cruel&#39;, &#39;world&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, MyNameIs&lt;&#39;my name is&#39;, &#39;Inigo&#39;, &#39;Montoya&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>Now let&#8217;s say in this case all we really care about is finding out the person&#8217;s first name.  We could traverse the whole tree, pulling out result[2], going through each one, checking to see if it&#8217;s a MyNameIs, then pulling out the right sub-element of that, etc, but actually we don&#8217;t have to.  Since we know we&#8217;re looking for an occurrence of <tt class="xref py py-class docutils literal"><span class="pre">FirstName</span></tt>, we can just ask the result object to find it and return it for us using <a class="reference internal" href="libref.html#modgrammar.Grammar.find" title="modgrammar.Grammar.find"><tt class="xref py py-meth docutils literal"><span class="pre">find()</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">FirstName</span><span class="p">)</span>
+<span class="go">FirstName&lt;&#39;Inigo&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Tada!  But what if there&#8217;s more than one, and we want to see all of them?  Well, there&#8217;s also a <a class="reference internal" href="libref.html#modgrammar.Grammar.find_all" title="modgrammar.Grammar.find_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_all()</span></tt></a> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">FirstName</span><span class="p">)</span>
+<span class="go">[FirstName&lt;&#39;Inigo&#39;&gt;, FirstName&lt;&#39;Fezzik&#39;&gt;]</span>
+</pre></div>
+</div>
+<p>If, however, you had some other part of your grammar that also used <tt class="xref py py-class docutils literal"><span class="pre">FirstName</span></tt> but you&#8217;re only interested in <tt class="xref py py-class docutils literal"><span class="pre">FirstName</span></tt>s that are part of <tt class="xref py py-class docutils literal"><span class="pre">MyNameIs</span></tt> constructs, you can do that too.  The <a class="reference internal" href="libref.html#modgrammar.Grammar.find" title="modgrammar.Grammar.find"><tt class="xref py py-meth docutils literal"><span class="pre">find()</span></tt></a> and <a class="reference internal" href="libref.html#modgrammar.Grammar.find_all" title="modgrammar.Grammar.find_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_all()</span></tt></a> methods will actually accept a list of any number of grammar types, which will be followed in order to find the result, so if, for example, you say <tt class="docutils literal"><span class="pre">result.find(MyNameIs,</span> <span class="pre">FirstName)</span></tt>, then an element will only match if it&#8217;s of type <tt class="xref py py-class docutils literal"><span class="pre">FirstName</span></tt> which is contained somewhere inside an element of type <tt class="xref py py-class docutils literal"><span class="pre">MyNameIs</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">MyNameIs</span><span class="p">,</span> <span class="n">FirstName</span><span class="p">)</span>
+<span class="go">[FirstName&lt;&#39;Inigo&#39;&gt;, FirstName&lt;&#39;Fezzik&#39;&gt;]</span>
+</pre></div>
+</div>
+<p>In some applications, you may just want to break some text down into its components, and don&#8217;t really care about the whole parse tree.  If this is the case, there&#8217;s a couple of other handy methods for you:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">terminals</span><span class="p">()</span>
+<span class="go">[L(&#39;Hello&#39;)&lt;&#39;Hello&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, L(&#39;my name is&#39;)&lt;&#39;my name is&#39;&gt;, WORD(&#39;A-Z&#39;, &#39;a-z&#39;)&lt;&#39;Inigo&#39;&gt;, WORD(&#39;A-Z&#39;, &#39;a-z&#39;)&lt;&#39;Montoya&#39;&gt;, L(&#39;,&#39;)&lt;&#39;,&#39;&gt;, L(&#39;my name is&#39;)&lt;&#39;my name is&#39;&gt;, WORD(&#39;A-Z&#39;, &#39;a-z&#39;)&lt;&#39;Fezzik&#39;&gt;, L(&#39;!&#39;)&lt;&#39;!&#39;&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tokens</span><span class="p">()</span>
+<span class="go">[&#39;Hello&#39;, &#39;,&#39;, &#39;my name is&#39;, &#39;Inigo&#39;, &#39;Montoya&#39;, &#39;,&#39;, &#39;my name is&#39;, &#39;Fezzik&#39;, &#39;!&#39;]</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="libref.html#modgrammar.Grammar.terminals" title="modgrammar.Grammar.terminals"><tt class="xref py py-meth docutils literal"><span class="pre">terminals()</span></tt></a> method will return all of the terminal elements (that is, elements that don&#8217;t have any sub-elements) in the tree.  Typically, this results in all of the individual literal strings, <tt class="xref py py-func docutils literal"><span class="pre">tokens()</span></tt> method actually just returns all of the actual strings associated with the terminals (thus it returns the original text, broken down into its component parts).</p>
+<p>Finally, if just searching by element type isn&#8217;t precise enough for you, there&#8217;s one more way to look up individual elements in a parse tree: tags.</p>
+<p>When defining any grammar class, you can associate with it one or more &#8220;tags&#8221;.  These are simple strings that can be used to identify or group elements which were generated from that grammar later.  For example, say we want to find any name component (both <tt class="xref py py-class docutils literal"><span class="pre">FirstName</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">LastName</span></tt>) of the parsed text.  We could search for each individually and put them together into one list, or we could just create a &#8220;name&#8221; tag and assign it to both <tt class="xref py py-class docutils literal"><span class="pre">FirstName</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">LastName</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FirstName</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORD</span><span class="p">(</span><span class="s">&quot;A-Z&quot;</span><span class="p">,</span> <span class="s">&quot;a-z&quot;</span><span class="p">))</span>
+    <span class="n">grammar_tags</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,)</span>
+
+<span class="k">class</span> <span class="nc">LastName</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORD</span><span class="p">(</span><span class="s">&quot;A-Z&quot;</span><span class="p">,</span> <span class="s">&quot;a-z&quot;</span><span class="p">))</span>
+    <span class="n">grammar_tags</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>Now if we generate a new result from this grammar, we can actually search for elements with a &#8220;name&#8221; tag using <a class="reference internal" href="libref.html#modgrammar.Grammar.find_tag" title="modgrammar.Grammar.find_tag"><tt class="xref py py-meth docutils literal"><span class="pre">find_tag()</span></tt></a> and <a class="reference internal" href="libref.html#modgrammar.Grammar.find_tag_all" title="modgrammar.Grammar.find_tag_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_tag_all()</span></tt></a>, just the same as we used <a class="reference internal" href="libref.html#modgrammar.Grammar.find" title="modgrammar.Grammar.find"><tt class="xref py py-meth docutils literal"><span class="pre">find()</span></tt></a> and <a class="reference internal" href="libref.html#modgrammar.Grammar.find_all" title="modgrammar.Grammar.find_all"><tt class="xref py py-meth docutils literal"><span class="pre">find_all()</span></tt></a> before:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find_tag</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+<span class="go">FirstName&lt;&#39;Inigo&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find_tag_all</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+<span class="go">[FirstName&lt;&#39;Inigo&#39;&gt;, LastName&lt;&#39;Montoya&#39;&gt;, FirstName&lt;&#39;Fezzik&#39;&gt;]</span>
+</pre></div>
+</div>
+<p>(You can even supply a list of tags to traverse, the same as we did with a list of types for the <a class="reference internal" href="libref.html#modgrammar.Grammar.find" title="modgrammar.Grammar.find"><tt class="xref py py-meth docutils literal"><span class="pre">find()</span></tt></a> methods.)</p>
+</div>
+<div class="section" id="results-may-vary-customizing-result-objects">
+<h3>Results May Vary: Customizing Result Objects<a class="headerlink" href="#results-may-vary-customizing-result-objects" title="Permalink to this headline">¶</a></h3>
+<p>Those with good memories will remember, back when we first introduced result objects, that result objects are actually instances of the grammar classes that produce them, and the comment that this could be very powerful, but we never really got into the details of that statement.  Now we&#8217;re going to.</p>
+<p>The reason this is so powerful, quite simply, is that it means when you define a grammar class, you&#8217;re not just defining the grammatical pattern of an element, but you&#8217;re also defining the characteristics of the result object which will be produced.  Specifically, you can define methods and attributes which will be inherited by the result object when it&#8217;s created.</p>
+<div class="section" id="elem-init">
+<h4>elem_init<a class="headerlink" href="#elem-init" title="Permalink to this headline">¶</a></h4>
+<p>Now, there are two kinds of methods you can define for this purpose: methods which override standard result object behaviors, and methods which provide entirely new functionality.  In the first category, the one you will most commonly be interested in is <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a>.</p>
+<p><a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> is called by the parsing engine after each result object is created, but before it is returned as part of a parse tree result.  This gives the object an opportunity to set up any custom state it wants before being returned to the caller.  For example, in our previous example, we could do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyNameIs</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;my name is&quot;</span><span class="p">,</span> <span class="n">FirstName</span><span class="p">,</span> <span class="n">OPTIONAL</span><span class="p">(</span><span class="n">LastName</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">elem_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sessiondata</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">firstname</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullname</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">firstname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Now if we take a look at the MyNameIs element produced from a parse result, it has some new (useful) attributes already set up for us:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mynameis</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">MyNameIs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mynameis</span><span class="o">.</span><span class="n">firstname</span>
+<span class="go">&#39;Inigo&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mynameis</span><span class="o">.</span><span class="n">lastname</span>
+<span class="go">&#39;Montoya&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mynameis</span><span class="o">.</span><span class="n">fullname</span>
+<span class="go">&#39;Inigo Montoya&#39;</span>
+</pre></div>
+</div>
+<p>(Note: You might be inclined to do this sort of thing in <tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> instead, but <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> is preferred for several reasons.  One is that <tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> has some specific arguments and expected behavior which the parsing engine relies on, so it is not recommended to override it.  Another is that at the time of <tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt>, the result object is not completely configured, so you do not have access to some useful aspects, such as the finalized list of sub-elements, session data, or anything that might be set up in sub-elements&#8217; <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> methods.  By the time <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> is called, you are guaranteed that the object has been fully set up and all of its sub-elements have been fully initialized.)</p>
+<p>You might also have noticed the <em>sessiondata</em> parameter passed to <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a>.  We didn&#8217;t take advantage of this earlier, but when you create your parser object, it is also possible to supply some &#8220;session data&#8221; (in the form of a dictionary of key-value parameters) which will be used when parsing text.  There are a couple of parser features that make use of this, but it&#8217;s mainly useful because it&#8217;s also passed to every object&#8217;s <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> method, giving you a way to communicate useful information from the creation of the parser all the way down to the initialization of the results.  For example, what if we changed <tt class="xref py py-meth docutils literal"><span class="pre">MyNameIs.elem_init()</span></tt> slightly, so the last line read:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">fullname</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">sessiondata</span><span class="p">[</span><span class="s">&quot;name_prefix&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Now, depending on how we create the parser, we can get different results:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">({</span><span class="s">&quot;name_prefix&quot;</span><span class="p">:</span> <span class="s">&quot;Mr.&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">MyNameIs</span><span class="p">)</span><span class="o">.</span><span class="n">fullname</span>
+<span class="go">&#39;Mr. Inigo Montoya&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">({</span><span class="s">&quot;name_prefix&quot;</span><span class="p">:</span> <span class="s">&quot;The swordfighter&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">MyNameIs</span><span class="p">)</span><span class="o">.</span><span class="n">fullname</span>
+<span class="go">&#39;The swordfighter Inigo Montoya&#39;</span>
+</pre></div>
+</div>
+<p>The example here is obviously a bit trivial, but it at least shows some of the potential of such a feature.</p>
+</div>
+<div class="section" id="dynamic-tagging">
+<h4>Dynamic Tagging<a class="headerlink" href="#dynamic-tagging" title="Permalink to this headline">¶</a></h4>
+<p>Another nifty trick that can be performed with <a class="reference internal" href="libref.html#modgrammar.Grammar.elem_init" title="modgrammar.Grammar.elem_init"><tt class="xref py py-meth docutils literal"><span class="pre">elem_init()</span></tt></a> is to combine it with tagging to produce dynamically-assigned element tags.  All you need to do is set a <tt class="xref py py-attr docutils literal"><span class="pre">grammar_tags</span></tt> attribute on the result object containing a tuple with the tags you want:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyNameIs</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;my name is&quot;</span><span class="p">,</span> <span class="n">FirstName</span><span class="p">,</span> <span class="n">OPTIONAL</span><span class="p">(</span><span class="n">LastName</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">elem_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sessiondata</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">firstname</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullname</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">firstname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastname</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grammar_tags</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;has_lastname&quot;</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>Now any MyNameIs result object which is created will have the &#8220;has_lastname&#8221; tag if, and only if, it actually has a last name:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">MyNameIs</span><span class="p">)</span>
+<span class="go">[MyNameIs&lt;&#39;my name is&#39;, &#39;Inigo&#39;, &#39;Montoya&#39;&gt;, MyNameIs&lt;&#39;my name is&#39;, &#39;Fezzik&#39;, None&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">find_tag_all</span><span class="p">(</span><span class="s">&quot;has_lastname&quot;</span><span class="p">)</span>
+<span class="go">[MyNameIs&lt;&#39;my name is&#39;, &#39;Inigo&#39;, &#39;Montoya&#39;&gt;]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="custom-methods-and-behaviors">
+<h4>Custom Methods and Behaviors<a class="headerlink" href="#custom-methods-and-behaviors" title="Permalink to this headline">¶</a></h4>
+<p>The other big advantage to being able to create your own methods and attributes for result objects is that you can give them their own custom behaviors.  For example, say we had a list of people&#8217;s names, and after we parse a line, we wanted to add any names we found to the list.  We could add a new method to the <tt class="xref py py-class docutils literal"><span class="pre">MyGrammar</span></tt> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyGrammar</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">OpeningWord</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="n">LIST_OF</span><span class="p">(</span><span class="n">WorldPhrase</span> <span class="o">|</span> <span class="n">MyNameIs</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="s">&quot;!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_names_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_names</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">MyNameIs</span><span class="p">):</span>
+           <span class="n">list_of_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">fullname</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now all we have to do is take the result object we get, and call that method, and presto:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span> <span class="o">=</span> <span class="n">MyGrammar</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">add_names_to_list</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">names</span>
+<span class="go">[&#39;Inigo Montoya&#39;, &#39;Fezzik &#39;]</span>
+</pre></div>
+</div>
+<p>Obviously, the options for this are limited only by one&#8217;s imagination.  It could range from something simple, like adding an <tt class="xref py py-meth docutils literal"><span class="pre">open()</span></tt> method to a grammar which parses filenames, to defining recursive methods to do complex analysis over an entire parse tree.  In fact, for simple programming language grammars, one might even create an <tt class="xref py py-meth docutils literal"><span class="pre">execute()</span></tt> method that takes the parse results and actually performs the operations they represent, turning a simple grammar definition into its own full-fledged self-interpreter.</p>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-topics">
+<h2>Advanced Topics<a class="headerlink" href="#advanced-topics" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="as-simple-as-possible-but-no-simpler">
+<h3>As Simple As Possible (But No Simpler)<a class="headerlink" href="#as-simple-as-possible-but-no-simpler" title="Permalink to this headline">¶</a></h3>
+<p>Once you&#8217;ve started creating fairly complex grammars, you may come to notice that they tend to accumulate a lot of extra levels that you don&#8217;t necessarily care about.  For example, in our perennial heavily-modified &#8220;hello world&#8221; example, every result object we get back is going to have an <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt> as its first element, which then inside it will have the actual word used, so to get the word we need to do an extra level of indirection (<tt class="docutils literal"><span class="pre">result[0][0]</span></tt>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, world!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">OpeningWord&lt;&#39;Hello&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">L(&#39;Hello&#39;)&lt;&#39;Hello&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Since the actual OpeningWord element doesn&#8217;t provide us with any real value, it would be nice if we could just remove it from the parse tree entirely so we only needed to do something like <tt class="docutils literal"><span class="pre">result[0]</span></tt> to get the value we care about instead.</p>
+<p>We can actually do this, using &#8220;grammar collapsing&#8221;.  Any individual grammar definition can be set to &#8220;collapse&#8221;, meaning that in the final parse tree, instead of the grammar object itself, its position will contain its sub-elements instead.  We can set the <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt> to collapse by setting its <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_collapse" title="modgrammar.Grammar.grammar_collapse"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_collapse</span></tt></a> attribute, like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">OpeningWord</span> <span class="p">(</span><span class="n">Grammar</span><span class="p">):</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">L</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">))</span>
+    <span class="n">grammar_collapse</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Now, if we take a look at a result object, we&#8217;ll see that the first element, instead of being an <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt> object, is now the literal object itself:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, world!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">L(&#39;Hello&#39;)&lt;&#39;Hello&#39;&gt;</span>
+</pre></div>
+</div>
+<p>There are some obvious things to watch out for with this, of course.  We&#8217;ve lost any information that the <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt> would have given us.  In this case it doesn&#8217;t matter, because we know it&#8217;s always going to be an <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt>, but in cases where it could be one of several different grammars, if they all collapse, there&#8217;s now no way to tell which grammar it actually was that matched.  Also, obviously, if we had defined custom methods/attributes on <tt class="xref py py-class docutils literal"><span class="pre">OpeningWord</span></tt>, those would be completely inaccessible to us now.</p>
+<p>One other thing to be careful of:  If you have a grammar which could result in a variable number of sub-elements (for example, a <a class="reference internal" href="libref.html#modgrammar.REPEAT" title="modgrammar.REPEAT"><tt class="xref py py-func docutils literal"><span class="pre">REPEAT()</span></tt></a> grammar, or an <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> grammar where the different options have different numbers of sub-elements), then if you set that grammar to collapse, it may not be easy in the result to tell where your collapsed grammar ends and the next element begins.</p>
+<p>Oh, one more thing:  Generally, if you have a grammar which contains literals, the collapsing mechanism will automatically leave out the literals from the collapsed result (unless the result <em>only</em> contains literals, in which case it will leave them in).  This is done because it usually doesn&#8217;t hurt anything (because literals will always be the same, you already should know what and where they&#8217;re going to be, so there&#8217;s no real need to have them in the collapsed result), and it makes for some useful side-benefits in some cases, but if for some reason this isn&#8217;t what you want for a particular grammar, then collapsing might not be appropriate for that case.</p>
+</div>
+<div class="section" id="advanced-parsing">
+<h3>Advanced Parsing<a class="headerlink" href="#advanced-parsing" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="buffering-and-partial-matches">
+<h4>Buffering and Partial Matches<a class="headerlink" href="#buffering-and-partial-matches" title="Permalink to this headline">¶</a></h4>
+<p>We covered basic use of a parser object earlier, but now it&#8217;s time to get into some more advanced techniques.  First of all, let&#8217;s talk a little bit about how parser objects actually work.</p>
+<p>In all the examples so far, we&#8217;ve been using our parser to parse single, individual texts which exactly match the full grammar.  Obviously, this works well when it&#8217;s feasible, but most real-world parsing situations aren&#8217;t that convenient.  Text to be parsed often consists of multiple instances of a grammar over and over (one per line in a file, for example), and the data can also often come in pieces which don&#8217;t necessarily line up with the beginning and end of the grammar (for example, if received in packets over a network).  In many cases it may even be very difficult for the calling program to know where the boundaries should be without actually doing the parsing, so we can&#8217;t always rely on being able to feed the parser exactly what it&#8217;s looking for.</p>
+<p>Luckily, parser objects are designed to take some of the complexity out of this for us.  In addition to nice, neatly split up texts like we&#8217;ve been using, you can actually feed any amount of text, in any number of pieces, into a parser object and it will still do its thing quite happily.  Take the following example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my na&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;me is Inigo Montoya! Hello, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Inigo Montoya&#39;, &#39;!&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Fezzik&#39;, &#39;!&#39;&gt;</span>
+</pre></div>
+</div>
+<p>In this, you can see a few things.  First, when we first called <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a>, we had a good start (the text matched the beginning of our grammar), but it wasn&#8217;t complete yet, so the parser just took that info and stored it away for later (returning <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> to indicate it needed more text).  The next time, we actually gave it too much text, but that&#8217;s ok, it finished matching the first instance of the grammar in the text and gave us back the result.  The extra didn&#8217;t get lost, though, it&#8217;s still stored in there ready for parsing the next time.  We then called <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> again with an empty string.  This didn&#8217;t add any more text to the buffer, but that&#8217;s ok because we already had a complete match in the buffer left over from before, so it was able to parse that and return it to us.</p>
+<p>But what if we didn&#8217;t want to parse the extra text left over in the buffer with this grammar?  What if we wanted to do something else with it instead?  Well, if we put too much in, we can always get it back by checking the remainder:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya! Hello, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="go">MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Inigo Montoya&#39;, &#39;!&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">remainder</span><span class="p">()</span>
+<span class="go">&#39; Hello, my name is Fezzik!&#39;</span>
+</pre></div>
+</div>
+<p>As a side-note, we can also find out how much of the text we actually did consume up to now (as well as what line/column we&#8217;d be on, assuming we were reading this from a file or something):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">char</span>
+<span class="go">32</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">line</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">col</span>
+<span class="go">32</span>
+</pre></div>
+</div>
+<p>So our match took up 32 characters of the input text, and left us with some leftover text of &#8216; Hello, my name is Fezzik!&#8217; (leaving us on column 32 of the 0th line (as with python indices, line/column numbers here are 0-based)).</p>
+<p>If we&#8217;re going to do something else with the remainder, though, we probably don&#8217;t want it to stay in the buffer, because then it would get in the way of whatever we wanted to parse next.  The <a class="reference internal" href="libref.html#modgrammar.GrammarParser.clear_remainder" title="modgrammar.GrammarParser.clear_remainder"><tt class="xref py py-meth docutils literal"><span class="pre">clear_remainder()</span></tt></a> method will take care of that for you.  Of course, that still keeps the character/line/column counts where they are.  If you want to reset everything back to its initial state, you can use <a class="reference internal" href="libref.html#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a> instead:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">clear_remainder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">remainder</span><span class="p">()</span>
+<span class="go">&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">char</span>
+<span class="go">32</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">remainder</span><span class="p">()</span>
+<span class="go">&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">char</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parse-string-options-and-other-parsing-methods">
+<h4><a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> Options and Other Parsing Methods<a class="headerlink" href="#parse-string-options-and-other-parsing-methods" title="Permalink to this headline">¶</a></h4>
+<p>Up to now, we&#8217;ve been using <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> in its most basic way, by simply passing a string of text, but <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> also supports several optional parameters which can affect how it parses the text, as well:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>reset</em></dt>
+<dd>If this option is set to a true value, the parser will automatically call <a class="reference internal" href="libref.html#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a> before starting to parse the supplied text.</dd>
+<dt><em>multi</em></dt>
+<dd>If set to a true value, then instead of just returning one match at a time, the parser will keep matching as many times as it can before returning, and return them all in a list.  Note that in this case, if it is unable to make any full matches (yet), it will return an empty list instead of <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt>.</dd>
+<dt><em>eof</em></dt>
+<dd>This indicates that we have hit the &#8220;end of file&#8221;, and there will not be any more text to process.  (This can really be used any time the calling application knows there isn&#8217;t any more text coming, regardless of whether the source is actually a file or not.)  This is needed for some grammars where it may not be clear from the grammar whether we&#8217;ve hit the end or not, but the calling application knows this must be the end so the parser should return the best match it&#8217;s got so far.  If <em>eof</em> is set, the parser will never return a <tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> result, unless the buffer is completely empty.</dd>
+<dt><em>data</em></dt>
+<dd>You remember the <em>sessiondata</em> from before?  Well, we can actually override it for individual parsing calls, too.  If this parameter is provided it&#8217;s used in place of the <em>sessiondata</em> provided when the parser was created.  (Note that if you get a partial-match (<tt class="xref py py-const docutils literal"><span class="pre">None</span></tt> result), you should use the <em>same</em> data for any successive calls until the match is completed, as changing the data provided in the middle of parsing a grammar can produce some unpredictable results.)</dd>
+<dt><em>matchtype</em></dt>
+<dd><p class="first">For many grammars, there end up being cases where a piece of text could match multiple different ways.  This parameter lets you change how the parser decides which match is the &#8220;best&#8221; one to return.  It can be one of several different options:</p>
+<dl class="docutils">
+<dt>&#8220;first&#8221; (default)</dt>
+<dd>The parser will return the first successful match the grammar comes up with.  As mentioned before, matches are generally attempted in left-to-right order of the grammar definition, so for any <a class="reference internal" href="libref.html#modgrammar.OR" title="modgrammar.OR"><tt class="xref py py-func docutils literal"><span class="pre">OR()</span></tt></a> clauses this means the leftmost successful match will be used.  (This is also affected by whether the grammars are greedy or not.  If a repetition is greedy, then the longest possible match will be first, otherwise the shortest will be the first one)</dd>
+<dt>&#8220;last&#8221;</dt>
+<dd>The parser will return the last successful match (using the same ordering  as for &#8220;first&#8221;, just taking the last one instead of the first one)</dd>
+<dt>&#8220;longest&#8221;</dt>
+<dd>The parser will return the match which uses up the longest portion of the input text.</dd>
+<dt>&#8220;shortest&#8221;</dt>
+<dd>The parser will return the match which uses up the shortest portion of the input text.</dd>
+<dt>&#8220;all&#8221;</dt>
+<dd>For each match, instead of returning one result object, the parser will return all possible result objects, in a list.  Note that in this case, the parser will not consume any of the text in the input buffer or advance the buffer position (because it&#8217;s not obvious which match length to use).  You must do this manually by calling <a class="reference internal" href="libref.html#modgrammar.GrammarParser.skip" title="modgrammar.GrammarParser.skip"><tt class="xref py py-func docutils literal"><span class="pre">skip()</span></tt></a> after each successful match.</dd>
+</dl>
+<p class="last">(It should be fairly obvious that &#8220;first&#8221; can be much more efficient than the other options, as the parser can stop after it gets the first match.  For all the other choices, the parser must keep trying until it finds all possible matches before it can decide which one to return.)</p>
+</dd>
+<dt><em>bol</em></dt>
+<dd>Indicates whether the parser should consider this text to be at the &#8220;beginning of a line&#8221;.  This is usually not needed, and really only affects grammars that use the <a class="reference internal" href="libref.html#modgrammar.BOL" title="modgrammar.BOL"><tt class="xref py py-const docutils literal"><span class="pre">BOL</span></tt></a> built-in to match on beginning-of-line.  This defaults to true if we are just starting (i.e. after a <a class="reference internal" href="libref.html#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a>), or if the last bit of text ended with a newline sequence, and false otherwise.  About the only time you will usually need to use this is if you are doing some unusual parsing where end-of-line is indicated by something outside the context of the text itself (even in those cases, it is often more convenient to just &#8220;fake it&#8221; by inserting newlines into the text before passing it to the parser instead).</dd>
+</dl>
+</div></blockquote>
+<p>(One sometimes useful combination is to call <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> with <tt class="docutils literal"><span class="pre">reset=True,</span> <span class="pre">eof=True</span></tt>, which basically eliminates all buffering, and forces the parser to match (or fail to match) each input text on its own merits for each call, regardless of what may come before or after (note that there may still be a remainder after the match, though, which would be discarded on the next call))</p>
+<p>In addition to the basic <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a>, parser objects also have a couple of other useful methods for parsing common types of inputs.  If you have a list (or really any iterable) of text items to parse, for example, you can use <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_lines" title="modgrammar.GrammarParser.parse_lines"><tt class="xref py py-meth docutils literal"><span class="pre">parse_lines()</span></tt></a> to iterate through them and return each match:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Hello, my na&quot;</span><span class="p">,</span> <span class="s">&quot;me is Inigo Montoya! Hello, my name is Fezzik!&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_lines</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">&lt;generator object parse_lines at 0x737f30&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="go">[MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Inigo Montoya&#39;, &#39;!&#39;&gt;, MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Fezzik&#39;, &#39;!&#39;&gt;]</span>
+</pre></div>
+</div>
+<p>Note that <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_lines" title="modgrammar.GrammarParser.parse_lines"><tt class="xref py py-meth docutils literal"><span class="pre">parse_lines()</span></tt></a> is a generator method, which means it will only actually perform the parsing as each item is needed, so you can stop early if you&#8217;ve already gotten what you needed without incurring the extra overhead of parsing everything that might come later (It basically functions by calling <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> as many times as necessary for each line in the input).  Note that although the method is called &#8220;parse_lines&#8221;, the input does not necessarily need to be broken up on line boundaries.  Also note that you must still include newline sequences at the end of your lines (if they&#8217;re important), the routine will not add them for you.</p>
+<p>Likewise, if you want to parse input from a file, there is a convenient <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_file" title="modgrammar.GrammarParser.parse_file"><tt class="xref py py-meth docutils literal"><span class="pre">parse_file()</span></tt></a> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;helloworld_input.txt&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Hello, my name is Inigo Montoya!&quot;</span><span class="p">)</span>
+<span class="go">32</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Hello, my name is Fezzik!&quot;</span><span class="p">)</span>
+<span class="go">25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myparser</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s">&quot;helloworld_input.txt&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">&lt;generator object parse_file at 0x65aa30&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="go">[MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Inigo Montoya&#39;, &#39;!&#39;&gt;, MyGrammar&lt;&#39;Hello&#39;, &#39;,&#39;, &#39;my name is Fezzik&#39;, &#39;!&#39;&gt;]</span>
+</pre></div>
+</div>
+<p>(<a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_file" title="modgrammar.GrammarParser.parse_file"><tt class="xref py py-meth docutils literal"><span class="pre">parse_file()</span></tt></a> is really just a wrapper method that opens the file, feeds its contents to <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_lines" title="modgrammar.GrammarParser.parse_lines"><tt class="xref py py-meth docutils literal"><span class="pre">parse_lines()</span></tt></a>, and then closes it.)</p>
+<p>Both of these other parsing methods accept all of the same optional parameters that <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_string" title="modgrammar.GrammarParser.parse_string"><tt class="xref py py-meth docutils literal"><span class="pre">parse_string()</span></tt></a> does (except <em>multi</em>).  In the case of <a class="reference internal" href="libref.html#modgrammar.GrammarParser.parse_file" title="modgrammar.GrammarParser.parse_file"><tt class="xref py py-meth docutils literal"><span class="pre">parse_file()</span></tt></a>, the <em>eof</em> argument defaults to true, meaning that when the end of the input file is reached, the parser will consider that to be EOF for the grammar (this can be overridden, though, if you don&#8217;t want this behavior).</p>
+</div>
+</div>
+<div class="section" id="exceptional-insight">
+<h3>Exceptional Insight<a class="headerlink" href="#exceptional-insight" title="Permalink to this headline">¶</a></h3>
+<p>Up to now, we&#8217;ve mostly been taking it for granted that the text you feed into the parser is going to match the grammar you&#8217;ve defined, but obviously in the real world this often isn&#8217;t the case.  When this happens, instead of returning a result to you, the parser will raise a <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt> exception instead.</p>
+<p>If you don&#8217;t catch a <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt> when it is raised, it will result in a traceback looking something like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">myparser</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="s">&quot;Something Bogus&quot;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">modgrammar.ParseError: [line 1, column 1] Expected &#39;Goodbye&#39; or &#39;Hello&#39;</span>: <span class="n">Found &#39;Something Bogus&#39;</span>
+</pre></div>
+</div>
+<p>Most of the time, of course, you will want to catch these exceptions and take appropriate action for your application.  If you choose to do this, there are some useful attributes of <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt> exception objects which you may want to take advantage of.</p>
+<p>As you can see by the default message (which you can obtain by just calling <tt class="xref py py-func docutils literal"><span class="pre">str()</span></tt> on the exception object), <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt>s have a lot of information in them.  They record not only that a problem occurred, but where (line and column) it was encountered in the input, as well as what the parser expected to find, and what it actually found.  All of these pieces of information are available via attributes on the exception object as well:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><a class="reference internal" href="libref.html#modgrammar.ParseError.line" title="modgrammar.ParseError.line"><tt class="xref py py-attr docutils literal"><span class="pre">line</span></tt></a>, <a class="reference internal" href="libref.html#modgrammar.ParseError.col" title="modgrammar.ParseError.col"><tt class="xref py py-attr docutils literal"><span class="pre">col</span></tt></a>, and <a class="reference internal" href="libref.html#modgrammar.ParseError.char" title="modgrammar.ParseError.char"><tt class="xref py py-attr docutils literal"><span class="pre">char</span></tt></a></dt>
+<dd>The line, column, and character of the input where the problem occurred (measured in the same way as the corresponding attributes on <tt class="xref py py-class docutils literal"><span class="pre">GrammarParser</span></tt>).  Note that after a parse exception occurs, the parser object&#8217;s values for these attributes will still reflect the end position of the last successful parse call (i.e. they&#8217;ll be the same as they were before the failed parse attempt), whereas the <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt> values will reflect the actual location within the failed input where the error occurred.</dd>
+<dt><a class="reference internal" href="libref.html#modgrammar.ParseError.expected" title="modgrammar.ParseError.expected"><tt class="xref py py-attr docutils literal"><span class="pre">expected</span></tt></a></dt>
+<dd>This contains a set of the possible valid grammars which could have matched at the given location (but obviously, none of them did).</dd>
+<dt><a class="reference internal" href="libref.html#modgrammar.ParseError.buffer" title="modgrammar.ParseError.buffer"><tt class="xref py py-attr docutils literal"><span class="pre">buffer</span></tt></a> and <a class="reference internal" href="libref.html#modgrammar.ParseError.pos" title="modgrammar.ParseError.pos"><tt class="xref py py-attr docutils literal"><span class="pre">pos</span></tt></a></dt>
+<dd>These are the parse buffer being used at the time of the error, and the position within that buffer at which the error occurred.</dd>
+<dt><a class="reference internal" href="libref.html#modgrammar.ParseError.message" title="modgrammar.ParseError.message"><tt class="xref py py-attr docutils literal"><span class="pre">message</span></tt></a></dt>
+<dd>This contains the text which is included after the line and column when printing this exception (or getting its string value with <tt class="xref py py-func docutils literal"><span class="pre">str()</span></tt>).</dd>
+</dl>
+</div></blockquote>
+<p>Note that once you get a <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt>, the offending text will still be in the parser&#8217;s buffer, so you will continue to get <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt>s until you use either <a class="reference internal" href="libref.html#modgrammar.GrammarParser.clear_remainder" title="modgrammar.GrammarParser.clear_remainder"><tt class="xref py py-meth docutils literal"><span class="pre">clear_remainder()</span></tt></a> or <a class="reference internal" href="libref.html#modgrammar.GrammarParser.reset" title="modgrammar.GrammarParser.reset"><tt class="xref py py-meth docutils literal"><span class="pre">reset()</span></tt></a> to clear the remainder.</p>
+<p>Now, the default message of the <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt> exception attempts to give a pretty good description of what it was expecting, (so that an end-user might be able to figure out what they did wrong and correct the input, for example), but what if it&#8217;s not quite as clear for your particular grammar as you&#8217;d like?  For example, generally if it runs into a problem on a particular token, it will say it was expecting that token, but sometimes a more descriptive way of identifying the actual construct it wanted can make things easier to understand.</p>
+<p>Luckily, this behavior is customizable.  The <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_desc" title="modgrammar.Grammar.grammar_desc"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_desc</span></tt></a> attribute of a grammar class is what <tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt>s use for this purpose, so if you want to you can override this to change what gets printed for a given grammar.  Note, however, that in most cases it won&#8217;t be your (custom) grammar that fails to match, but rather one of its sub-grammars (such as a <a class="reference internal" href="libref.html#modgrammar.LITERAL" title="modgrammar.LITERAL"><tt class="xref py py-func docutils literal"><span class="pre">LITERAL()</span></tt></a> or <a class="reference internal" href="libref.html#modgrammar.WORD" title="modgrammar.WORD"><tt class="xref py py-func docutils literal"><span class="pre">WORD()</span></tt></a>) instead, so most of the time you&#8217;ll actually need to change their <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_desc" title="modgrammar.Grammar.grammar_desc"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_desc</span></tt></a> attributes, which can be done by passing the <em>desc</em> keyword argument when you create them.</p>
+<p>But what if that&#8217;s too much detail?  Sometimes exposing the all the niggly details of the sub-grammar is really more information than you (or your end users) want.  In this case, you can also hide the sub-grammars from <a class="reference internal" href="libref.html#modgrammar.ParseError" title="modgrammar.ParseError"><tt class="xref py py-exc docutils literal"><span class="pre">ParseError</span></tt></a> results by setting the <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_error_override" title="modgrammar.Grammar.grammar_error_override"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_error_override</span></tt></a> attribute on a parent grammar.  If this is set, then any time there&#8217;s a failure in one of the sub-grammars, it will pretend that the parent grammar failed as a whole, and will report it (and its <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_desc" title="modgrammar.Grammar.grammar_desc"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_desc</span></tt></a>) as the failure instead.  (Note that if you do this, you will probably want to set your own custom <a class="reference internal" href="libref.html#modgrammar.Grammar.grammar_desc" title="modgrammar.Grammar.grammar_desc"><tt class="xref py py-attr docutils literal"><span class="pre">grammar_desc</span></tt></a> at the same time.)</p>
+</div>
+<div class="section" id="optional-extras">
+<h3>Optional Extras<a class="headerlink" href="#optional-extras" title="Permalink to this headline">¶</a></h3>
+<p>There is one other neat little feature I wanted to mention.  Once you&#8217;ve created your custom grammar, it is sometimes useful (for documentation, etc) to be able to represent it in a standard, textual form.  The <a class="reference internal" href="libref.html#module-modgrammar" title="modgrammar"><tt class="xref py py-mod docutils literal"><span class="pre">modgrammar</span></tt></a> module also supplies a function which can be used to take any grammar and produce an EBNF (Extended Backus-Naur Form) text description of it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">modgrammar</span> <span class="kn">import</span> <span class="n">generate_ebnf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">generate_ebnf</span><span class="p">(</span><span class="n">MyGrammar</span><span class="p">))</span>
+<span class="go">MyGrammar   = OpeningWord, &#39;,&#39;, ( WorldPhrase | MyNameIs ), [( WorldPhrase |</span>
+<span class="go">              MyNameIs )], &#39;!&#39;;</span>
+<span class="go">OpeningWord = ( &#39;Hello&#39; | &#39;Goodbye&#39; );</span>
+<span class="go">WorldPhrase = [( &#39;cruel&#39; | &#39;wonderful&#39; )], &#39;world&#39;;</span>
+<span class="go">MyNameIs    = &#39;my name is&#39;, FirstName, [LastName];</span>
+<span class="go">FirstName   = ? WORD(&#39;A-Z&#39;, &#39;a-z&#39;) ?;</span>
+<span class="go">LastName    = ? WORD(&#39;A-Z&#39;, &#39;a-z&#39;) ?;</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="libref.html#modgrammar.generate_ebnf" title="modgrammar.generate_ebnf"><tt class="xref py py-func docutils literal"><span class="pre">generate_ebnf()</span></tt></a> function is a generator function that produces text output lines, suitable for writing to a file, etc.  As you can see, it generates a full EBNF description of the grammar, using the same class names we used when defining it.  It does its best to convert standard constructs (such as optional phrases and repetitions) to the standard form of representing them in EBNF, but as shown in the <tt class="docutils literal"><span class="pre">FirstName</span></tt> and <tt class="docutils literal"><span class="pre">LastName</span></tt> cases, there are some constructs that just don&#8217;t translate very well (it is possible to represent them in standard EBNF, but the results are often really cumbersome and difficult to understand).  For those cases, it will use EBNF &#8220;special sequences&#8221; to provide a more readable representation by default.</p>
+<p>There are a few different options to control exactly how it will represent grammars in EBNF.  We won&#8217;t get into those in detail here, but for more information, take a look at the documentation for the <a class="reference internal" href="libref.html#modgrammar.generate_ebnf" title="modgrammar.generate_ebnf"><tt class="xref py py-func docutils literal"><span class="pre">generate_ebnf()</span></tt></a> function.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Modgrammar Tutorial</a><ul>
+<li><a class="reference internal" href="#grammar-basics">Grammar Basics</a><ul>
+<li><a class="reference internal" href="#creating-a-grammar">Creating a Grammar</a></li>
+<li><a class="reference internal" href="#making-things-more-interesting">Making Things More Interesting</a></li>
+<li><a class="reference internal" href="#going-deeper-nested-grammars">Going Deeper: Nested Grammars</a></li>
+<li><a class="reference internal" href="#full-circle-references-and-recursion">Full Circle: References and Recursion</a><ul>
+<li><a class="reference internal" href="#left-recursion">Left Recursion</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#customizing-general-behaviors">Customizing General Behaviors</a><ul>
+<li><a class="reference internal" href="#whitespace-handling">Whitespace Handling</a></li>
+<li><a class="reference internal" href="#greed-is-good-but-not-always">Greed Is Good (But Not Always)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-results">Using the Results</a></li>
+<li><a class="reference internal" href="#results-may-vary-customizing-result-objects">Results May Vary: Customizing Result Objects</a><ul>
+<li><a class="reference internal" href="#elem-init">elem_init</a></li>
+<li><a class="reference internal" href="#dynamic-tagging">Dynamic Tagging</a></li>
+<li><a class="reference internal" href="#custom-methods-and-behaviors">Custom Methods and Behaviors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-topics">Advanced Topics</a><ul>
+<li><a class="reference internal" href="#as-simple-as-possible-but-no-simpler">As Simple As Possible (But No Simpler)</a></li>
+<li><a class="reference internal" href="#advanced-parsing">Advanced Parsing</a><ul>
+<li><a class="reference internal" href="#buffering-and-partial-matches">Buffering and Partial Matches</a></li>
+<li><a class="reference internal" href="#parse-string-options-and-other-parsing-methods"><tt class="docutils literal"><span class="pre">parse_string()</span></tt> Options and Other Parsing Methods</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exceptional-insight">Exceptional Insight</a></li>
+<li><a class="reference internal" href="#optional-extras">Optional Extras</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">The Modular Grammar Engine</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="libref.html"
+                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">modgrammar</span></tt> &#8211; The Modular Grammar Engine</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="libref.html" title="modgrammar – The Modular Grammar Engine"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="The Modular Grammar Engine"
+             >previous</a> |</li>
+        <li><a href="index.html">Modgrammar 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Alex Stewart &lt;alex@foogod.com&gt;.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
