@@ -12,8 +12,9 @@ Welcome to the documentation for the Modular Grammar Engine (modgrammar).  Modgr
 Modgrammar Resources
 ====================
 
-* Python Package Index: http://pypi.python.org/pypi/modgrammar
-* Project Home: http://code.google.com/p/modgrammar
+* Python Package Index: http://pypi.python.org/pypi/modgrammar-py2
+* Parent Project Home: http://code.google.com/p/modgrammar
+* Github Py2/Py3 Fork Home: https://github.com/don-ramon/modgrammar-py2
 * Documentation: http://code.google.com/p/modgrammar/wiki/Docs
 
 General Documentation

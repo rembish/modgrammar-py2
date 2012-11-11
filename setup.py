@@ -17,7 +17,7 @@ setup(
     license='BSD',
     author='Alex Stewart, Aleksey Rembish',
     author_email='alex@foogod.com, alex@rembish.ru',
-    description='Modular grammar-parsing engine (Python 2.6+ backport)',
+    description='Modular grammar-parsing engine (Python 2.6+ / Python 3.x)',
     long_description=pkg_readme,
     zip_safe=True,
     classifiers=[
@@ -29,6 +29,9 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.1',
+        'Programming Language :: Python :: 3.2',
         'Topic :: Text Processing',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
@@ -37,7 +40,6 @@ setup(
     test_suite='tests.all_tests',
     include_package_data=False,
     install_requires=[],
-    #cmdclass=dict(build_sphinx=BuildSphinxCommand),
     command_options={
         'build_sphinx': dict(
             build_dir=('setup.py', 'build'),

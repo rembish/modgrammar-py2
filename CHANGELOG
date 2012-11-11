@@ -1,9 +1,14 @@
+Version 0.9.0: 2012-11-11 Aleksey Rembish <alex@rembish.ru>
+  * Because of different metaclass support Grammar class will be loaded for Python versions specified modules
+  * Python 2.6+ and Python 3.x support
+  * Both Python versions pass all tests
+
 Version 0.8.2: 2012-11-06 Aleksey Rembish <alex@rembish.ru>
   * Code reformated, imports normalized, new-style classes
   * Fixed Py2 compatibility: Python 2.x has no __bool__ method, using __nonzero__ instead
   * Fixed Py2 compatibility: Reference resoulving through .pyc files
   * Fixed Py2 compatibility: String .format method old syntax support
-  * Py2 version passes all test for now
+  * Py2 version passes all tests for now
 
 Version 0.8: 2011-12-22 Alex Stewart <alex@foogod.com>
   * Added NOT_FOLLOWED_BY grammar construct
