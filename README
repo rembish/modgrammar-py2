@@ -7,6 +7,7 @@ complex expression evaluation, to full-fledged programming language parsing for
 compilers or interpreters.
 
 Documentation: http://don-ramon.github.com/modgrammar-py2
+Parent Project: http://code.google.com/p/modgrammar
 
 Some features include:
 
