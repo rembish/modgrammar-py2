@@ -43,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Modgrammar Py2/Py3'
-copyright = '2012, Alex Stewart <alex@foogod.com>, Aleksey Rembish <alex@rembish.ru>'
+copyright = '2012, Alex Stewart <alex@foogod.com>, Alex Rembish <alex@rembish.ru>'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
