@@ -214,7 +214,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'modgrammar', 'Modgrammar Py2/Py3 Documentation',
-     ['Alex Stewart <alex@foogod.com>', 'Aleksey Rembish <alex@rembish.ru>'], 1)
+     ['Alex Stewart <alex@foogod.com>', 'Alex Rembish <alex@rembish.ru>'], 1)
 ]
 
 # -- Hack to workaround bug in Py3 ---------------------------------------------
