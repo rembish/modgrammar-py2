@@ -13,7 +13,7 @@ setup(
     name='modgrammar-py2',
     version=pkg_version,
     url='http://code.google.com/p/modgrammar',
-    download_url='https://github.com/don-ramon/modgrammar-py2',
+    download_url='https://github.com/rembish/modgrammar-py2',
     license='BSD',
     author='Alex Stewart, Aleksey Rembish',
     author_email='alex@foogod.com, alex@rembish.ru',
