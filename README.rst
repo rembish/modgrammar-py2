@@ -1,4 +1,4 @@
-https://api.travis-ci.org/rembish/modgrammar-py2.png
+.. image:: https://api.travis-ci.org/rembish/modgrammar-py2.png
 
 Modgrammar is a general-purpose library for constructing language parsers and
 interpreters using context-free grammar definitions in Python. Language

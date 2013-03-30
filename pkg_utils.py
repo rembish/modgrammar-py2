@@ -37,10 +37,10 @@ def get_changelog_version():
 
 def get_readme():
   try:
-    text = open(os.path.join(pkg_base_dir, 'README')).read()
+    text = open(os.path.join(pkg_base_dir, 'README.rst.rst')).read()
   except IOError as e:
     if e.errno == 2:
-      # No README file found.
+      # No README.rst file found.
       text = ''
     else:
       raise
